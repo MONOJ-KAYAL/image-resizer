@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OptiPixel - Accurate Image Resizer & File Size Reducer</title>
+  
+  <!-- PWA Meta Tags & Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="OptiPixel">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome Icons -->
@@ -38,7 +48,6 @@
   </script>
 
   <style>
-    /* Custom styling for sliders & transitions */
     input[type=range] {
       accent-color: #4f46e5;
     }
@@ -52,9 +61,6 @@
       background-size: 16px 16px;
       background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
     }
-    .pulse-glow {
-      box-shadow: 0 0 15px rgba(79, 70, 229, 0.35);
-    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
@@ -65,29 +71,17 @@
     <span id="toastMessage">Success message</span>
   </div>
 
-  <!-- Header -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-          <i class="fa-solid fa-crop-simple text-lg"></i>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            OptiPixel <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Pro</span>
-          </h1>
-          <p class="text-xs text-slate-500">Accurate Resizer & Target Size Reducer</p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-2">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          100% Client-Side Privacy
-        </span>
-      </div>
+  <!-- PWA Install Prompt Banner (Visible when browser triggers installability) -->
+  <div id="installBanner" class="hidden bg-indigo-600 text-white px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between sticky top-0 z-50 shadow-md">
+    <div class="flex items-center gap-2">
+      <i class="fa-solid fa-download"></i>
+      <span>Install OptiPixel app on your device for instant offline access.</span>
     </div>
-  </header>
+    <div class="flex items-center gap-2">
+      <button id="installAppBtn" class="bg-white text-indigo-700 px-3 py-1 rounded-lg font-bold shadow-xs hover:bg-indigo-50 transition-colors">Install</button>
+      <button id="dismissInstallBtn" class="text-white/80 hover:text-white px-1.5"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
 
   <!-- Main Content Area -->
   <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
@@ -96,9 +90,12 @@
     <div id="uploadSection" class="transition-all duration-300">
       <div class="max-w-3xl mx-auto mt-6">
         <div class="text-center mb-6">
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Resize & Compress to Exact File Sizes</h2>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-3 border border-indigo-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 100% Client-Side Private
+          </div>
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Accurate Image Resizer & Target Size Reducer</h1>
           <p class="text-slate-500 text-sm sm:text-base mt-2 max-w-xl mx-auto">
-            Need an image strictly under 50 KB, 100 KB, or customized for documents, passport forms, and social media? Upload your file below.
+            Reduce file size strictly under exact KB or MB limits (20 KB, 50 KB, 100 KB) and customize dimensions for portal applications, IDs, and social media.
           </p>
         </div>
 
@@ -114,7 +111,7 @@
               Drop your image here, or <span class="text-indigo-600 underline decoration-2 underline-offset-4">browse files</span>
             </h3>
             <p class="text-xs sm:text-sm text-slate-400 mt-1.5">
-              Supports JPG, PNG, WEBP, GIF, BMP (Unlimited original file size)
+              Supports JPG, PNG, WEBP, GIF, BMP
             </p>
 
             <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -125,7 +122,7 @@
                 <i class="fa-solid fa-lock text-emerald-500 mr-1.5"></i> Never uploads to a server
               </span>
               <span class="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                <i class="fa-solid fa-bullseye text-indigo-500 mr-1.5"></i> Exact KB target matching
+                <i class="fa-solid fa-bullseye text-indigo-500 mr-1.5"></i> Exact target KB matching
               </span>
             </div>
           </div>
@@ -143,7 +140,7 @@
     <!-- Active Workspace (Hidden until an image is uploaded) -->
     <div id="workspaceSection" class="hidden transition-all duration-300">
       
-      <!-- Top Action Bar (Reset / Title) -->
+      <!-- Top Action Bar -->
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200">
         <div class="flex items-center gap-3">
           <div class="p-2 bg-slate-100 rounded-lg text-slate-700">
@@ -162,10 +159,10 @@
         </div>
       </div>
 
-      <!-- Main Layout: Left Controls, Right Preview & Comparison -->
+      <!-- Main Grid Layout -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        <!-- ================= LEFT COLUMN: SETTINGS ================= -->
+        <!-- Controls Column -->
         <div class="lg:col-span-5 space-y-5">
           
           <!-- Box 1: Dimensions -->
@@ -198,7 +195,7 @@
               </div>
             </div>
 
-            <!-- Dimension Preset Pills -->
+            <!-- Presets -->
             <div>
               <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Quick Scale & Presets</div>
               <div class="flex flex-wrap gap-1.5">
@@ -213,21 +210,20 @@
             </div>
           </div>
 
-          <!-- Box 2: Target File Size & Quality Mode -->
+          <!-- Box 2: Target File Size & Quality -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <i class="fa-solid fa-compress text-indigo-600"></i> Size & Compression
               </h3>
               
-              <!-- Mode Tabs -->
               <div class="inline-flex p-0.5 bg-slate-100 rounded-lg text-xs font-semibold">
                 <button id="modeTargetBtn" class="px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all">Target Size</button>
                 <button id="modeManualBtn" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all">Manual Quality</button>
               </div>
             </div>
 
-            <!-- Mode A: Target File Size (KB/MB) -->
+            <!-- Target Size Mode -->
             <div id="targetSizeModeContainer" class="space-y-3">
               <div>
                 <label for="targetSizeInput" class="block text-xs font-medium text-slate-600 mb-1">
@@ -259,13 +255,13 @@
                 <label class="flex items-start gap-2 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="autoScaleDownToggle" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
                   <span>
-                    <strong>Smart Auto-Downscale:</strong> Automatically scale down resolution if the target KB is impossible to achieve through quality reduction alone.
+                    <strong>Smart Auto-Downscale:</strong> Automatically scale down resolution if the target KB cannot be met by compression alone.
                   </span>
                 </label>
               </div>
             </div>
 
-            <!-- Mode B: Manual Quality Slider (Hidden by default) -->
+            <!-- Manual Quality Mode -->
             <div id="manualQualityModeContainer" class="hidden space-y-3">
               <div class="flex items-center justify-between">
                 <label for="qualitySlider" class="text-xs font-medium text-slate-600">Compression Quality</label>
@@ -290,29 +286,26 @@
               <label class="cursor-pointer">
                 <input type="radio" name="formatOption" value="image/jpeg" checked class="peer sr-only">
                 <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
-                  <i class="fa-regular fa-file-image text-base mb-1 block"></i>
-                  JPG
+                  <i class="fa-regular fa-file-image text-base mb-1 block"></i> JPG
                 </div>
               </label>
 
               <label class="cursor-pointer">
                 <input type="radio" name="formatOption" value="image/png" class="peer sr-only">
                 <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
-                  <i class="fa-solid fa-file-image text-base mb-1 block"></i>
-                  PNG
+                  <i class="fa-solid fa-file-image text-base mb-1 block"></i> PNG
                 </div>
               </label>
 
               <label class="cursor-pointer">
                 <input type="radio" name="formatOption" value="application/pdf" class="peer sr-only">
                 <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
-                  <i class="fa-solid fa-file-pdf text-base mb-1 block"></i>
-                  PDF Document
+                  <i class="fa-solid fa-file-pdf text-base mb-1 block"></i> PDF Document
                 </div>
               </label>
             </div>
 
-            <!-- PDF specific options -->
+            <!-- PDF Options -->
             <div id="pdfOptions" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs text-slate-600">
               <div class="font-semibold text-slate-800 flex items-center gap-1.5">
                 <i class="fa-solid fa-sliders text-indigo-600"></i> PDF Page Setup
@@ -330,7 +323,7 @@
             </div>
           </div>
 
-          <!-- Box 4: Action Buttons (Sticky/Prominent) -->
+          <!-- Box 4: Action Buttons -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
             <button id="downloadBtn" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-sm shadow-md shadow-indigo-200 flex items-center justify-center gap-2 transition-all active:scale-[0.99]">
               <i class="fa-solid fa-download"></i>
@@ -349,10 +342,10 @@
 
         </div>
 
-        <!-- ================= RIGHT COLUMN: COMPARISON & PREVIEW ================= -->
+        <!-- Preview Column -->
         <div class="lg:col-span-7 space-y-5">
 
-          <!-- Comparison Summary Card -->
+          <!-- Results Summary Card -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
               <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -395,7 +388,7 @@
             </div>
           </div>
 
-          <!-- Visual Comparison View Tabs -->
+          <!-- Preview Container -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -408,7 +401,6 @@
               </div>
             </div>
 
-            <!-- Preview Display Container -->
             <div class="relative min-h-[360px] max-h-[550px] rounded-xl overflow-hidden checkered-bg flex items-center justify-center p-2 border border-slate-200">
               
               <!-- Processing Spinner Overlay -->
@@ -417,21 +409,20 @@
                 <span class="text-xs font-bold text-slate-700">Compressing & optimizing...</span>
               </div>
 
-              <!-- Single View: Optimized Result -->
+              <!-- Single View -->
               <div id="singlePreviewContainer" class="w-full h-full flex items-center justify-center">
                 <img id="optimizedImgPreview" class="max-w-full max-h-[480px] object-contain rounded-lg shadow-sm" alt="Optimized Preview">
-                <!-- PDF preview mock if PDF format -->
                 <div id="pdfMockPreview" class="hidden flex flex-col items-center justify-center p-8 bg-white border border-slate-200 rounded-xl shadow-md text-center max-w-sm">
                   <div class="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-3xl mb-3">
                     <i class="fa-solid fa-file-pdf"></i>
                   </div>
                   <h4 class="text-sm font-bold text-slate-800">PDF Document Ready</h4>
-                  <p class="text-xs text-slate-500 mt-1">Image embedded into standard PDF vector page with requested compression.</p>
+                  <p class="text-xs text-slate-500 mt-1">Image embedded into standard PDF page with requested compression.</p>
                   <span id="pdfPageInfo" class="mt-3 text-xs bg-slate-100 text-slate-700 font-mono px-2.5 py-1 rounded-lg">Fit to image</span>
                 </div>
               </div>
 
-              <!-- Side-by-Side View (hidden by default) -->
+              <!-- Side-by-Side View -->
               <div id="sideBySideContainer" class="hidden w-full grid grid-cols-2 gap-3 h-full items-center">
                 <div class="flex flex-col items-center h-full">
                   <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 bg-white/90 px-2 py-0.5 rounded shadow-xs">Original</span>
@@ -449,7 +440,6 @@
 
             </div>
 
-            <!-- Footer note on transparency -->
             <div class="text-[11px] text-slate-400 flex items-center justify-between">
               <span>Canvas renderer applies clean white fill behind alpha when exporting to JPG or PDF.</span>
               <span id="canvasDimLabel" class="font-mono text-slate-500">1920 × 1080</span>
@@ -464,19 +454,53 @@
 
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 mt-auto py-5 text-center text-xs text-slate-400">
-    <p>OptiPixel • 100% Client-Side Private Image Resizer & Accurate Size Compressor</p>
+  <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-400">
+    <p>OptiPixel • Accurate Image Resizer & File Size Compressor</p>
   </footer>
 
-  <!-- Hidden Offscreen Canvas for Image Processing -->
   <canvas id="offscreenCanvas" class="hidden"></canvas>
 
-  <!-- JavaScript Logic -->
   <script>
-    /**
-     * OptiPixel - Accurate Client-Side Image Resizer & Compressor Engine
-     */
+    // PWA Service Worker Registration & Installation Prompt Handling
+    let deferredPrompt = null;
+    const installBanner = document.getElementById('installBanner');
+    const installAppBtn = document.getElementById('installAppBtn');
+    const dismissInstallBtn = document.getElementById('dismissInstallBtn');
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker Registered successfully:', reg.scope))
+          .catch((err) => console.log('Service Worker Registration failed:', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBanner.classList.remove('hidden');
+    });
+
+    installAppBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBanner.classList.add('hidden');
+        }
+        deferredPrompt = null;
+      }
+    });
+
+    dismissInstallBtn.addEventListener('click', () => {
+      installBanner.classList.add('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      installBanner.classList.add('hidden');
+      deferredPrompt = null;
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       // DOM Elements
       const uploadSection = document.getElementById('uploadSection');
@@ -486,7 +510,6 @@
       const sampleImageBtn = document.getElementById('sampleImageBtn');
       const resetBtn = document.getElementById('resetBtn');
 
-      // Header Elements
       const headerFileName = document.getElementById('headerFileName');
       const headerFileInfo = document.getElementById('headerFileInfo');
 
@@ -508,18 +531,18 @@
       const qualitySlider = document.getElementById('qualitySlider');
       const qualityDisplay = document.getElementById('qualityDisplay');
 
-      // Output Format Controls
+      // Format Controls
       const formatRadios = document.querySelectorAll('input[name="formatOption"]');
       const pdfOptions = document.getElementById('pdfOptions');
       const pdfPageSizeRadios = document.querySelectorAll('input[name="pdfPageSize"]');
 
-      // Action Buttons
+      // Buttons
       const downloadBtn = document.getElementById('downloadBtn');
       const downloadBtnText = document.getElementById('downloadBtnText');
       const copyClipboardBtn = document.getElementById('copyClipboardBtn');
       const reapplyBtn = document.getElementById('reapplyBtn');
 
-      // Stats & Previews
+      // Stats
       const origSizeDisplay = document.getElementById('origSizeDisplay');
       const origDimDisplay = document.getElementById('origDimDisplay');
       const origFormatDisplay = document.getElementById('origFormatDisplay');
@@ -531,7 +554,7 @@
       const algorithmNoticeText = document.getElementById('algorithmNoticeText');
       const canvasDimLabel = document.getElementById('canvasDimLabel');
 
-      // View Toggles
+      // Previews
       const viewOptimizedBtn = document.getElementById('viewOptimizedBtn');
       const viewSideBySideBtn = document.getElementById('viewSideBySideBtn');
       const singlePreviewContainer = document.getElementById('singlePreviewContainer');
@@ -548,7 +571,7 @@
       const toastIcon = document.getElementById('toastIcon');
       const toastMessage = document.getElementById('toastMessage');
 
-      // Canvas
+      // Offscreen Canvas
       const offscreenCanvas = document.getElementById('offscreenCanvas');
       const ctx = offscreenCanvas.getContext('2d');
 
@@ -560,13 +583,12 @@
       let originalSize = 0;
       let originalAspectRatio = 1;
       let isAspectRatioLocked = true;
-      let activeMode = 'target'; // 'target' or 'manual'
+      let activeMode = 'target';
       let optimizedBlob = null;
       let optimizedUrl = null;
       let debounceTimer = null;
       let isProcessing = false;
 
-      // Toast notification helper
       function showToast(message, type = 'success') {
         toastMessage.textContent = message;
         if (type === 'success') {
@@ -586,7 +608,6 @@
         }, 3000);
       }
 
-      // Format bytes to clean readable string (KB or MB)
       function formatBytes(bytes, decimals = 1) {
         if (!bytes || bytes === 0) return '0 KB';
         const k = 1024;
@@ -600,7 +621,6 @@
         }
       }
 
-      // Drag and Drop Listeners
       ['dragenter', 'dragover'].forEach(eventName => {
         dropZone.addEventListener(eventName, (e) => {
           e.preventDefault();
@@ -631,14 +651,12 @@
         }
       });
 
-      // Sample Image Generator
       sampleImageBtn.addEventListener('click', () => {
         const sampleCanvas = document.createElement('canvas');
         sampleCanvas.width = 1920;
         sampleCanvas.height = 1080;
         const sCtx = sampleCanvas.getContext('2d');
 
-        // Draw vibrant gradient
         const grad = sCtx.createLinearGradient(0, 0, 1920, 1080);
         grad.addColorStop(0, '#4f46e5');
         grad.addColorStop(0.5, '#7c3aed');
@@ -646,28 +664,20 @@
         sCtx.fillStyle = grad;
         sCtx.fillRect(0, 0, 1920, 1080);
 
-        // Draw geometric art
-        sCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.15)';
         for (let i = 0; i < 20; i++) {
           sCtx.beginPath();
-          sCtx.arc(
-            (i * 120) % 1920,
-            (i * 95) % 1080,
-            40 + (i * 15),
-            0,
-            Math.PI * 2
-          );
+          sCtx.arc((i * 120) % 1920, (i * 95) % 1080, 40 + (i * 15), 0, Math.PI * 2);
           sCtx.fill();
         }
 
-        // Draw typography
         sCtx.fillStyle = '#ffffff';
         sCtx.font = 'bold 72px Inter, sans-serif';
         sCtx.textAlign = 'center';
         sCtx.fillText('OptiPixel Sample Artwork', 1920 / 2, 520);
         sCtx.font = '32px Inter, sans-serif';
         sCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        sCtx.fillText('1920 × 1080 • High-Quality 24-bit Canvas Source', 1920 / 2, 590);
+        sCtx.fillText('1920 × 1080 • Ready for compression', 1920 / 2, 590);
 
         sampleCanvas.toBlob((blob) => {
           const sampleFile = new File([blob], 'sample_artwork.jpg', { type: 'image/jpeg' });
@@ -675,7 +685,6 @@
         }, 'image/jpeg', 0.95);
       });
 
-      // Process uploaded file
       function handleSelectedFile(file) {
         if (!file.type.startsWith('image/')) {
           showToast('Please select a valid image file (JPG, PNG, WEBP, etc.)', 'error');
@@ -693,30 +702,24 @@
             originalHeight = originalImage.naturalHeight;
             originalAspectRatio = originalWidth / originalHeight;
 
-            // Set up UI inputs
             widthInput.value = originalWidth;
             heightInput.value = originalHeight;
 
-            // Set up Original Stats
             headerFileName.textContent = file.name;
             headerFileInfo.textContent = `${originalWidth} × ${originalHeight} px • ${formatBytes(originalSize)}`;
             origSizeDisplay.textContent = formatBytes(originalSize);
             origDimDisplay.textContent = `${originalWidth} × ${originalHeight} px`;
             origFormatDisplay.textContent = file.type.replace('image/', '').toUpperCase();
 
-            // Set up original preview image
             origImgPreview.src = e.target.result;
 
-            // Show workspace
             uploadSection.classList.add('hidden');
             workspaceSection.classList.remove('hidden');
 
-            // Default target size heuristic: 50% of original or 100 KB whichever is smaller
             const sensibleTargetKb = Math.max(20, Math.min(200, Math.round(originalSize / 1024 * 0.4)));
             targetSizeInput.value = sensibleTargetKb;
             targetSizeUnit.value = 'KB';
 
-            // Trigger compression
             triggerOptimization();
             showToast('Image loaded successfully!');
           };
@@ -725,7 +728,6 @@
         reader.readAsDataURL(file);
       }
 
-      // Reset App
       resetBtn.addEventListener('click', () => {
         fileInput.value = '';
         currentFile = null;
@@ -737,14 +739,12 @@
         uploadSection.classList.remove('hidden');
       });
 
-      // Aspect Ratio Lock Toggle
       aspectRatioLockBtn.addEventListener('click', () => {
         isAspectRatioLocked = !isAspectRatioLocked;
         if (isAspectRatioLocked) {
           lockIcon.className = 'fa-solid fa-link';
           lockStatusText.textContent = 'Ratio Locked';
           aspectRatioLockBtn.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200 hover:bg-indigo-100 transition-colors';
-          // Recalculate height from width
           const w = parseInt(widthInput.value, 10);
           if (w > 0) {
             heightInput.value = Math.max(1, Math.round(w / originalAspectRatio));
@@ -757,7 +757,6 @@
         }
       });
 
-      // Dimension Input Handlers
       widthInput.addEventListener('input', () => {
         let w = parseInt(widthInput.value, 10);
         if (isNaN(w) || w <= 0) return;
@@ -776,7 +775,6 @@
         scheduleOptimization();
       });
 
-      // Dimension Preset Scale Buttons (100%, 75%, 50%, 25%)
       document.querySelectorAll('.preset-scale-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const scale = parseFloat(btn.dataset.scale);
@@ -786,7 +784,6 @@
         });
       });
 
-      // Dimension Aspect Ratio / Specific Presets
       document.querySelectorAll('.preset-dim-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const preset = btn.dataset.preset;
@@ -797,7 +794,6 @@
             widthInput.value = 1920;
             heightInput.value = 1080;
           } else if (preset === 'passport') {
-            // Standard 35mm x 45mm ratio at standard resolution: 413 x 531 px
             widthInput.value = 413;
             heightInput.value = 531;
           }
@@ -805,7 +801,6 @@
         });
       });
 
-      // Compression Mode Switch (Target vs Manual)
       modeTargetBtn.addEventListener('click', () => {
         activeMode = 'target';
         modeTargetBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
@@ -824,7 +819,6 @@
         scheduleOptimization();
       });
 
-      // Target size chips
       document.querySelectorAll('.target-chip-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.target-chip-btn').forEach(b => {
@@ -841,13 +835,11 @@
       targetSizeUnit.addEventListener('change', scheduleOptimization);
       autoScaleDownToggle.addEventListener('change', scheduleOptimization);
 
-      // Manual Quality Slider
       qualitySlider.addEventListener('input', () => {
         qualityDisplay.textContent = `${qualitySlider.value}%`;
         scheduleOptimization();
       });
 
-      // Format Selection Radios
       formatRadios.forEach(radio => {
         radio.addEventListener('change', () => {
           if (radio.value === 'application/pdf') {
@@ -861,7 +853,6 @@
 
       pdfPageSizeRadios.forEach(r => r.addEventListener('change', scheduleOptimization));
 
-      // View Mode Toggles (Single vs Side-by-Side)
       viewOptimizedBtn.addEventListener('click', () => {
         viewOptimizedBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
         viewSideBySideBtn.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all font-semibold';
@@ -878,7 +869,6 @@
 
       reapplyBtn.addEventListener('click', triggerOptimization);
 
-      // Debounce scheduler to avoid freezing on rapid slider/input changes
       function scheduleOptimization() {
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
@@ -886,7 +876,6 @@
         }, 220);
       }
 
-      // Helper: Canvas to Blob promise
       function canvasToBlobPromise(canvas, mimeType, quality) {
         return new Promise((resolve) => {
           canvas.toBlob((blob) => {
@@ -895,9 +884,6 @@
         });
       }
 
-      /**
-       * Core Engine: Smart Iterative Compression & Target Size Binary Search
-       */
       async function triggerOptimization() {
         if (!originalImage.src || isProcessing) return;
         isProcessing = true;
@@ -911,7 +897,6 @@
           const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
           const isPdf = selectedFormat === 'application/pdf';
 
-          // Determine target bytes if in Target Size mode
           let targetBytes = Infinity;
           if (activeMode === 'target') {
             const rawVal = parseFloat(targetSizeInput.value) || 100;
@@ -928,17 +913,13 @@
           let achievedDimensions = { width: curWidth, height: curHeight };
           let noticeMessage = '';
 
-          // Format for canvas rendering
-          // If PDF is chosen, we compress to JPEG first, then pack inside PDF
           const canvasMime = (selectedFormat === 'image/png' && !isPdf) ? 'image/png' : 'image/jpeg';
 
           if (activeMode === 'manual') {
-            // Manual Quality Mode
             const qualityRatio = parseInt(qualitySlider.value, 10) / 100;
             offscreenCanvas.width = curWidth;
             offscreenCanvas.height = curHeight;
 
-            // Fill white background for non-alpha exports
             if (canvasMime === 'image/jpeg') {
               ctx.fillStyle = '#FFFFFF';
               ctx.fillRect(0, 0, curWidth, curHeight);
@@ -951,10 +932,7 @@
             bestQuality = qualityRatio;
             noticeMessage = `Manual quality set to ${(qualityRatio * 100).toFixed(0)}%.`;
           } else {
-            // Target File Size Mode: Iterative Binary Search on Canvas
-            // Reserve ~4 KB overhead for PDF headers if exporting as PDF
             const effectiveTargetBytes = isPdf ? Math.max(1024, targetBytes - 4096) : targetBytes;
-
             let scaleAttempt = 0;
             const maxScaleAttempts = allowAutoDownscale ? 5 : 1;
             let successUnderTarget = false;
@@ -972,20 +950,17 @@
               ctx.drawImage(originalImage, 0, 0, curWidth, curHeight);
 
               if (canvasMime === 'image/png') {
-                // PNG is lossless in standard canvas. Size is directly controlled by pixel count.
                 bestBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
                 if (bestBlob.size <= effectiveTargetBytes || !allowAutoDownscale) {
                   successUnderTarget = bestBlob.size <= effectiveTargetBytes;
                   break;
                 } else {
-                  // Downscale resolution to fit PNG target size
                   const ratio = Math.sqrt(effectiveTargetBytes / bestBlob.size) * 0.94;
                   curWidth = Math.max(32, Math.round(curWidth * ratio));
                   curHeight = Math.max(32, Math.round(curHeight * ratio));
                   scaleAttempt++;
                 }
               } else {
-                // JPEG Binary Search on Quality (0.02 to 1.0)
                 let low = 0.02;
                 let high = 1.0;
                 let iterations = 0;
@@ -1000,16 +975,13 @@
                   if (b.size <= effectiveTargetBytes) {
                     candidateBlob = b;
                     candidateQuality = mid;
-                    // Try higher quality while still under target
                     low = mid + 0.05;
                   } else {
-                    // Too big, reduce quality
                     high = mid - 0.05;
                   }
                 }
 
                 if (!candidateBlob) {
-                  // Even at lowest quality, file was larger than target
                   candidateBlob = await canvasToBlobPromise(offscreenCanvas, 'image/jpeg', 0.02);
                   candidateQuality = 0.02;
                 }
@@ -1020,7 +992,6 @@
                   successUnderTarget = true;
                   break;
                 } else {
-                  // Still too large at min quality. Auto-downscale canvas resolution if enabled.
                   bestBlob = candidateBlob;
                   bestQuality = candidateQuality;
                   if (allowAutoDownscale && curWidth > 64 && curHeight > 64) {
@@ -1048,12 +1019,10 @@
             }
           }
 
-          // Handle PDF output if selected
           if (isPdf) {
             const { jsPDF } = window.jspdf;
             const pdfPageMode = document.querySelector('input[name="pdfPageSize"]:checked').value;
             
-            // Read compressed jpeg data URL for PDF embedding
             const imgDataUrl = await new Promise((res) => {
               const r = new FileReader();
               r.onload = () => res(r.target.result);
@@ -1062,7 +1031,6 @@
 
             let doc;
             if (pdfPageMode === 'fit') {
-              // Custom PDF page matching image resolution (points)
               doc = new jsPDF({
                 orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
                 unit: 'px',
@@ -1071,7 +1039,6 @@
               doc.addImage(imgDataUrl, 'JPEG', 0, 0, achievedDimensions.width, achievedDimensions.height);
               pdfPageInfo.textContent = `Fit Page: ${achievedDimensions.width} × ${achievedDimensions.height} px`;
             } else {
-              // Standard A4 sheet
               doc = new jsPDF({
                 orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
                 unit: 'mm',
@@ -1104,13 +1071,11 @@
             optimizedBlob = bestBlob;
           }
 
-          // Release previous object URL
           if (optimizedUrl) {
             URL.revokeObjectURL(optimizedUrl);
           }
           optimizedUrl = URL.createObjectURL(optimizedBlob);
 
-          // Update Previews
           if (isPdf) {
             pdfMockPreview.classList.remove('hidden');
             optimizedImgPreview.classList.add('hidden');
@@ -1122,7 +1087,6 @@
             optimizedImgPreviewSplit.src = optimizedUrl;
           }
 
-          // Update Stats
           const newSize = optimizedBlob.size;
           newSizeDisplay.textContent = formatBytes(newSize);
           newDimDisplay.textContent = `${achievedDimensions.width} × ${achievedDimensions.height} px`;
@@ -1131,7 +1095,6 @@
           let formatLabel = isPdf ? 'PDF Document' : (selectedFormat === 'image/png' ? 'PNG (Lossless)' : `JPG (Quality ${Math.round(bestQuality * 100)}%)`);
           newFormatDisplay.textContent = formatLabel;
 
-          // Savings badge
           const savedBytes = originalSize - newSize;
           const savedPercent = ((savedBytes / originalSize) * 100).toFixed(1);
           if (savedBytes > 0) {
@@ -1143,7 +1106,6 @@
             savingsPercentageBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-amber-600 text-white';
           }
 
-          // Target reached check
           if (activeMode === 'target') {
             if (newSize <= targetBytes) {
               targetSuccessBadge.classList.remove('hidden');
@@ -1159,8 +1121,6 @@
           }
 
           algorithmNoticeText.textContent = noticeMessage;
-
-          // Download button text
           downloadBtnText.textContent = `Download ${formatBytes(newSize)} ${isPdf ? 'PDF' : selectedFormat.replace('image/', '').toUpperCase()}`;
 
         } catch (error) {
@@ -1173,7 +1133,6 @@
         }
       }
 
-      // Download Action
       downloadBtn.addEventListener('click', () => {
         if (!optimizedBlob) {
           showToast('No processed image to download.', 'error');
@@ -1198,7 +1157,6 @@
         showToast(`Saved ${filename} to local device!`);
       });
 
-      // Copy Image to Clipboard Action
       copyClipboardBtn.addEventListener('click', async () => {
         if (!optimizedBlob) return;
         const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
@@ -1210,10 +1168,8 @@
 
         try {
           if (navigator.clipboard && window.ClipboardItem) {
-            // Browsers strictly support PNG in ClipboardItem
             let copyBlob = optimizedBlob;
             if (optimizedBlob.type !== 'image/png') {
-              // Convert canvas to PNG blob for clipboard compatibility
               copyBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
             }
             await navigator.clipboard.write([
