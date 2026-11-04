@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OptiPixel - Accurate Image Resizer & File Size Reducer</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- jsPDF for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom styling for sliders & transitions */
+    input[type=range] {
+      accent-color: #4f46e5;
+    }
+    .checkered-bg {
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    }
+    .pulse-glow {
+      box-shadow: 0 0 15px rgba(79, 70, 229, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+
+  <!-- Toast Notification Bar -->
+  <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-120%] opacity-0 transition-all duration-300 ease-out flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl bg-slate-900 text-white text-sm font-medium border border-slate-700 pointer-events-none">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <span id="toastMessage">Success message</span>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i class="fa-solid fa-crop-simple text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            OptiPixel <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Pro</span>
+          </h1>
+          <p class="text-xs text-slate-500">Accurate Resizer & Target Size Reducer</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          100% Client-Side Privacy
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Upload Dropzone (Visible when no image is loaded) -->
+    <div id="uploadSection" class="transition-all duration-300">
+      <div class="max-w-3xl mx-auto mt-6">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Resize & Compress to Exact File Sizes</h2>
+          <p class="text-slate-500 text-sm sm:text-base mt-2 max-w-xl mx-auto">
+            Need an image strictly under 50 KB, 100 KB, or customized for documents, passport forms, and social media? Upload your file below.
+          </p>
+        </div>
+
+        <!-- Drop Box -->
+        <div id="dropZone" class="group relative border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-3xl p-8 sm:p-12 text-center bg-white transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md">
+          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/bmp,image/gif" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+          
+          <div class="flex flex-col items-center">
+            <div class="w-20 h-20 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-200">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-800">
+              Drop your image here, or <span class="text-indigo-600 underline decoration-2 underline-offset-4">browse files</span>
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1.5">
+              Supports JPG, PNG, WEBP, GIF, BMP (Unlimited original file size)
+            </p>
+
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <span class="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                <i class="fa-solid fa-bolt text-amber-500 mr-1.5"></i> Instant processing
+              </span>
+              <span class="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                <i class="fa-solid fa-lock text-emerald-500 mr-1.5"></i> Never uploads to a server
+              </span>
+              <span class="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                <i class="fa-solid fa-bullseye text-indigo-500 mr-1.5"></i> Exact KB target matching
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Try Sample Button -->
+        <div class="text-center mt-5">
+          <button id="sampleImageBtn" class="text-xs text-slate-500 hover:text-indigo-600 inline-flex items-center gap-1.5 font-medium transition-colors">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Don't have an image ready? Try with a sample image
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Workspace (Hidden until an image is uploaded) -->
+    <div id="workspaceSection" class="hidden transition-all duration-300">
+      
+      <!-- Top Action Bar (Reset / Title) -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="p-2 bg-slate-100 rounded-lg text-slate-700">
+            <i class="fa-solid fa-image text-lg"></i>
+          </div>
+          <div>
+            <span id="headerFileName" class="text-sm font-bold text-slate-900 truncate max-w-[200px] sm:max-w-sm block">filename.jpg</span>
+            <span id="headerFileInfo" class="text-xs text-slate-500">1920 × 1080 px • 2.45 MB</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button id="resetBtn" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 transition-colors shadow-sm">
+            <i class="fa-solid fa-arrow-rotate-left"></i> Change Image
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Layout: Left Controls, Right Preview & Comparison -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- ================= LEFT COLUMN: SETTINGS ================= -->
+        <div class="lg:col-span-5 space-y-5">
+          
+          <!-- Box 1: Dimensions -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-vector-square text-indigo-600"></i> Resize Dimensions
+              </h3>
+              <button id="aspectRatioLockBtn" title="Maintain Aspect Ratio" class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200 hover:bg-indigo-100 transition-colors">
+                <i id="lockIcon" class="fa-solid fa-link"></i>
+                <span id="lockStatusText">Ratio Locked</span>
+              </button>
+            </div>
+
+            <!-- Width & Height Inputs -->
+            <div class="grid grid-cols-2 gap-3 items-center">
+              <div>
+                <label for="widthInput" class="block text-xs font-medium text-slate-600 mb-1">Width (px)</label>
+                <div class="relative">
+                  <input type="number" id="widthInput" min="1" max="15000" class="w-full px-3 py-2 text-sm font-semibold rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50">
+                  <span class="absolute right-3 top-2 text-xs text-slate-400 pointer-events-none">px</span>
+                </div>
+              </div>
+              <div>
+                <label for="heightInput" class="block text-xs font-medium text-slate-600 mb-1">Height (px)</label>
+                <div class="relative">
+                  <input type="number" id="heightInput" min="1" max="15000" class="w-full px-3 py-2 text-sm font-semibold rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50">
+                  <span class="absolute right-3 top-2 text-xs text-slate-400 pointer-events-none">px</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dimension Preset Pills -->
+            <div>
+              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Quick Scale & Presets</div>
+              <div class="flex flex-wrap gap-1.5">
+                <button data-scale="1" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">Original</button>
+                <button data-scale="0.75" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">75%</button>
+                <button data-scale="0.5" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">50%</button>
+                <button data-scale="0.25" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">25%</button>
+                <button data-preset="square" class="preset-dim-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">1080×1080 (1:1)</button>
+                <button data-preset="fhd" class="preset-dim-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">1920×1080 (16:9)</button>
+                <button data-preset="passport" class="preset-dim-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">Passport (3.5×4.5)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Box 2: Target File Size & Quality Mode -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-compress text-indigo-600"></i> Size & Compression
+              </h3>
+              
+              <!-- Mode Tabs -->
+              <div class="inline-flex p-0.5 bg-slate-100 rounded-lg text-xs font-semibold">
+                <button id="modeTargetBtn" class="px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all">Target Size</button>
+                <button id="modeManualBtn" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all">Manual Quality</button>
+              </div>
+            </div>
+
+            <!-- Mode A: Target File Size (KB/MB) -->
+            <div id="targetSizeModeContainer" class="space-y-3">
+              <div>
+                <label for="targetSizeInput" class="block text-xs font-medium text-slate-600 mb-1">
+                  Specify Exact Maximum Target Size
+                </label>
+                <div class="flex gap-2">
+                  <div class="relative flex-1">
+                    <input type="number" id="targetSizeInput" min="1" step="1" value="100" class="w-full px-3 py-2 text-sm font-semibold rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50" placeholder="e.g. 50">
+                  </div>
+                  <select id="targetSizeUnit" class="px-3 py-2 text-sm font-semibold rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 focus:outline-none focus:border-indigo-600">
+                    <option value="KB" selected>KB</option>
+                    <option value="MB">MB</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Quick Target Chips -->
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <button data-target="20" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">20 KB</button>
+                <button data-target="50" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">50 KB</button>
+                <button data-target="100" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">100 KB</button>
+                <button data-target="200" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">200 KB</button>
+                <button data-target="500" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">500 KB</button>
+                <button data-target="1" data-unit="MB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">1 MB</button>
+                <button data-target="2" data-unit="MB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">2 MB</button>
+              </div>
+
+              <div class="pt-2 border-t border-slate-100">
+                <label class="flex items-start gap-2 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" id="autoScaleDownToggle" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
+                  <span>
+                    <strong>Smart Auto-Downscale:</strong> Automatically scale down resolution if the target KB is impossible to achieve through quality reduction alone.
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Mode B: Manual Quality Slider (Hidden by default) -->
+            <div id="manualQualityModeContainer" class="hidden space-y-3">
+              <div class="flex items-center justify-between">
+                <label for="qualitySlider" class="text-xs font-medium text-slate-600">Compression Quality</label>
+                <span id="qualityDisplay" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">80%</span>
+              </div>
+              <input type="range" id="qualitySlider" min="1" max="100" value="80" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                <span>Smallest File (1%)</span>
+                <span>Balanced (80%)</span>
+                <span>Maximum (100%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Box 3: Output Format -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-file-export text-indigo-600"></i> Output Format
+            </h3>
+            
+            <div class="grid grid-cols-3 gap-2">
+              <label class="cursor-pointer">
+                <input type="radio" name="formatOption" value="image/jpeg" checked class="peer sr-only">
+                <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
+                  <i class="fa-regular fa-file-image text-base mb-1 block"></i>
+                  JPG
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="formatOption" value="image/png" class="peer sr-only">
+                <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
+                  <i class="fa-solid fa-file-image text-base mb-1 block"></i>
+                  PNG
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="formatOption" value="application/pdf" class="peer sr-only">
+                <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
+                  <i class="fa-solid fa-file-pdf text-base mb-1 block"></i>
+                  PDF Document
+                </div>
+              </label>
+            </div>
+
+            <!-- PDF specific options -->
+            <div id="pdfOptions" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs text-slate-600">
+              <div class="font-semibold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-indigo-600"></i> PDF Page Setup
+              </div>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name="pdfPageSize" value="fit" checked class="text-indigo-600">
+                  <span>Match Image Size</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name="pdfPageSize" value="a4" class="text-indigo-600">
+                  <span>Standard A4 Sheet</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Box 4: Action Buttons (Sticky/Prominent) -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+            <button id="downloadBtn" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-sm shadow-md shadow-indigo-200 flex items-center justify-center gap-2 transition-all active:scale-[0.99]">
+              <i class="fa-solid fa-download"></i>
+              <span id="downloadBtnText">Download Optimized Image</span>
+            </button>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button id="copyClipboardBtn" class="py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors">
+                <i class="fa-regular fa-clipboard"></i> Copy to Clipboard
+              </button>
+              <button id="reapplyBtn" class="py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors">
+                <i class="fa-solid fa-rotate"></i> Re-Calculate
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= RIGHT COLUMN: COMPARISON & PREVIEW ================= -->
+        <div class="lg:col-span-7 space-y-5">
+
+          <!-- Comparison Summary Card -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-chart-simple text-indigo-600"></i> Optimization Result
+              </h3>
+              <div id="targetSuccessBadge" class="hidden inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i> Target Reached
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Original Stats -->
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Original Image</span>
+                <div id="origSizeDisplay" class="text-lg font-extrabold text-slate-800">0 KB</div>
+                <div class="text-xs text-slate-500 mt-1 flex flex-col gap-0.5">
+                  <span id="origDimDisplay">0 × 0 px</span>
+                  <span id="origFormatDisplay" class="capitalize text-[11px] text-slate-400">JPEG</span>
+                </div>
+              </div>
+
+              <!-- Optimized Stats -->
+              <div class="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Optimized File</span>
+                  <span id="savingsPercentageBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">-0%</span>
+                </div>
+                <div id="newSizeDisplay" class="text-lg font-extrabold text-indigo-900">0 KB</div>
+                <div class="text-xs text-indigo-700/80 mt-1 flex flex-col gap-0.5">
+                  <span id="newDimDisplay">0 × 0 px</span>
+                  <span id="newFormatDisplay" class="capitalize text-[11px]">JPG (Quality 85%)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Algorithm status message -->
+            <div id="algorithmNotice" class="mt-3 text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center gap-2">
+              <i class="fa-solid fa-circle-info text-indigo-500"></i>
+              <span id="algorithmNoticeText">Target size calculated accurately via iterative binary search.</span>
+            </div>
+          </div>
+
+          <!-- Visual Comparison View Tabs -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-eye text-indigo-600"></i> Visual Preview
+              </h3>
+
+              <div class="inline-flex p-0.5 bg-slate-100 rounded-lg text-xs font-semibold">
+                <button id="viewOptimizedBtn" class="px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all">Optimized Result</button>
+                <button id="viewSideBySideBtn" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all">Side-by-Side</button>
+              </div>
+            </div>
+
+            <!-- Preview Display Container -->
+            <div class="relative min-h-[360px] max-h-[550px] rounded-xl overflow-hidden checkered-bg flex items-center justify-center p-2 border border-slate-200">
+              
+              <!-- Processing Spinner Overlay -->
+              <div id="processingOverlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-2 transition-opacity duration-200 opacity-0 pointer-events-none">
+                <div class="w-9 h-9 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-xs font-bold text-slate-700">Compressing & optimizing...</span>
+              </div>
+
+              <!-- Single View: Optimized Result -->
+              <div id="singlePreviewContainer" class="w-full h-full flex items-center justify-center">
+                <img id="optimizedImgPreview" class="max-w-full max-h-[480px] object-contain rounded-lg shadow-sm" alt="Optimized Preview">
+                <!-- PDF preview mock if PDF format -->
+                <div id="pdfMockPreview" class="hidden flex flex-col items-center justify-center p-8 bg-white border border-slate-200 rounded-xl shadow-md text-center max-w-sm">
+                  <div class="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-3xl mb-3">
+                    <i class="fa-solid fa-file-pdf"></i>
+                  </div>
+                  <h4 class="text-sm font-bold text-slate-800">PDF Document Ready</h4>
+                  <p class="text-xs text-slate-500 mt-1">Image embedded into standard PDF vector page with requested compression.</p>
+                  <span id="pdfPageInfo" class="mt-3 text-xs bg-slate-100 text-slate-700 font-mono px-2.5 py-1 rounded-lg">Fit to image</span>
+                </div>
+              </div>
+
+              <!-- Side-by-Side View (hidden by default) -->
+              <div id="sideBySideContainer" class="hidden w-full grid grid-cols-2 gap-3 h-full items-center">
+                <div class="flex flex-col items-center h-full">
+                  <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1 bg-white/90 px-2 py-0.5 rounded shadow-xs">Original</span>
+                  <div class="flex-1 flex items-center justify-center overflow-hidden">
+                    <img id="origImgPreview" class="max-w-full max-h-[440px] object-contain rounded-lg shadow-sm" alt="Original">
+                  </div>
+                </div>
+                <div class="flex flex-col items-center h-full">
+                  <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1 bg-white/90 px-2 py-0.5 rounded shadow-xs">Optimized</span>
+                  <div class="flex-1 flex items-center justify-center overflow-hidden">
+                    <img id="optimizedImgPreviewSplit" class="max-w-full max-h-[440px] object-contain rounded-lg shadow-sm" alt="Optimized">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Footer note on transparency -->
+            <div class="text-[11px] text-slate-400 flex items-center justify-between">
+              <span>Canvas renderer applies clean white fill behind alpha when exporting to JPG or PDF.</span>
+              <span id="canvasDimLabel" class="font-mono text-slate-500">1920 × 1080</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-auto py-5 text-center text-xs text-slate-400">
+    <p>OptiPixel • 100% Client-Side Private Image Resizer & Accurate Size Compressor</p>
+  </footer>
+
+  <!-- Hidden Offscreen Canvas for Image Processing -->
+  <canvas id="offscreenCanvas" class="hidden"></canvas>
+
+  <!-- JavaScript Logic -->
+  <script>
+    /**
+     * OptiPixel - Accurate Client-Side Image Resizer & Compressor Engine
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM Elements
+      const uploadSection = document.getElementById('uploadSection');
+      const workspaceSection = document.getElementById('workspaceSection');
+      const dropZone = document.getElementById('dropZone');
+      const fileInput = document.getElementById('fileInput');
+      const sampleImageBtn = document.getElementById('sampleImageBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      // Header Elements
+      const headerFileName = document.getElementById('headerFileName');
+      const headerFileInfo = document.getElementById('headerFileInfo');
+
+      // Dimension Controls
+      const widthInput = document.getElementById('widthInput');
+      const heightInput = document.getElementById('heightInput');
+      const aspectRatioLockBtn = document.getElementById('aspectRatioLockBtn');
+      const lockIcon = document.getElementById('lockIcon');
+      const lockStatusText = document.getElementById('lockStatusText');
+
+      // Size Mode Controls
+      const modeTargetBtn = document.getElementById('modeTargetBtn');
+      const modeManualBtn = document.getElementById('modeManualBtn');
+      const targetSizeModeContainer = document.getElementById('targetSizeModeContainer');
+      const manualQualityModeContainer = document.getElementById('manualQualityModeContainer');
+      const targetSizeInput = document.getElementById('targetSizeInput');
+      const targetSizeUnit = document.getElementById('targetSizeUnit');
+      const autoScaleDownToggle = document.getElementById('autoScaleDownToggle');
+      const qualitySlider = document.getElementById('qualitySlider');
+      const qualityDisplay = document.getElementById('qualityDisplay');
+
+      // Output Format Controls
+      const formatRadios = document.querySelectorAll('input[name="formatOption"]');
+      const pdfOptions = document.getElementById('pdfOptions');
+      const pdfPageSizeRadios = document.querySelectorAll('input[name="pdfPageSize"]');
+
+      // Action Buttons
+      const downloadBtn = document.getElementById('downloadBtn');
+      const downloadBtnText = document.getElementById('downloadBtnText');
+      const copyClipboardBtn = document.getElementById('copyClipboardBtn');
+      const reapplyBtn = document.getElementById('reapplyBtn');
+
+      // Stats & Previews
+      const origSizeDisplay = document.getElementById('origSizeDisplay');
+      const origDimDisplay = document.getElementById('origDimDisplay');
+      const origFormatDisplay = document.getElementById('origFormatDisplay');
+      const newSizeDisplay = document.getElementById('newSizeDisplay');
+      const newDimDisplay = document.getElementById('newDimDisplay');
+      const newFormatDisplay = document.getElementById('newFormatDisplay');
+      const savingsPercentageBadge = document.getElementById('savingsPercentageBadge');
+      const targetSuccessBadge = document.getElementById('targetSuccessBadge');
+      const algorithmNoticeText = document.getElementById('algorithmNoticeText');
+      const canvasDimLabel = document.getElementById('canvasDimLabel');
+
+      // View Toggles
+      const viewOptimizedBtn = document.getElementById('viewOptimizedBtn');
+      const viewSideBySideBtn = document.getElementById('viewSideBySideBtn');
+      const singlePreviewContainer = document.getElementById('singlePreviewContainer');
+      const sideBySideContainer = document.getElementById('sideBySideContainer');
+      const optimizedImgPreview = document.getElementById('optimizedImgPreview');
+      const optimizedImgPreviewSplit = document.getElementById('optimizedImgPreviewSplit');
+      const origImgPreview = document.getElementById('origImgPreview');
+      const pdfMockPreview = document.getElementById('pdfMockPreview');
+      const pdfPageInfo = document.getElementById('pdfPageInfo');
+      const processingOverlay = document.getElementById('processingOverlay');
+
+      // Toast
+      const toast = document.getElementById('toast');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastMessage = document.getElementById('toastMessage');
+
+      // Canvas
+      const offscreenCanvas = document.getElementById('offscreenCanvas');
+      const ctx = offscreenCanvas.getContext('2d');
+
+      // State
+      let currentFile = null;
+      let originalImage = new Image();
+      let originalWidth = 0;
+      let originalHeight = 0;
+      let originalSize = 0;
+      let originalAspectRatio = 1;
+      let isAspectRatioLocked = true;
+      let activeMode = 'target'; // 'target' or 'manual'
+      let optimizedBlob = null;
+      let optimizedUrl = null;
+      let debounceTimer = null;
+      let isProcessing = false;
+
+      // Toast notification helper
+      function showToast(message, type = 'success') {
+        toastMessage.textContent = message;
+        if (type === 'success') {
+          toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
+        } else if (type === 'error') {
+          toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400 text-base';
+        } else {
+          toastIcon.className = 'fa-solid fa-circle-info text-indigo-400 text-base';
+        }
+
+        toast.classList.remove('translate-y-[-120%]', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(() => {
+          toast.classList.remove('translate-y-0', 'opacity-100');
+          toast.classList.add('translate-y-[-120%]', 'opacity-0');
+        }, 3000);
+      }
+
+      // Format bytes to clean readable string (KB or MB)
+      function formatBytes(bytes, decimals = 1) {
+        if (!bytes || bytes === 0) return '0 KB';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        if (bytes < k) {
+          return `${bytes} B`;
+        } else if (bytes < k * k) {
+          return `${(bytes / k).toFixed(dm)} KB`;
+        } else {
+          return `${(bytes / (k * k)).toFixed(dm)} MB`;
+        }
+      }
+
+      // Drag and Drop Listeners
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.add('border-indigo-600', 'bg-indigo-50/40');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.remove('border-indigo-600', 'bg-indigo-50/40');
+        });
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+          handleSelectedFile(files[0]);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          handleSelectedFile(e.target.files[0]);
+        }
+      });
+
+      // Sample Image Generator
+      sampleImageBtn.addEventListener('click', () => {
+        const sampleCanvas = document.createElement('canvas');
+        sampleCanvas.width = 1920;
+        sampleCanvas.height = 1080;
+        const sCtx = sampleCanvas.getContext('2d');
+
+        // Draw vibrant gradient
+        const grad = sCtx.createLinearGradient(0, 0, 1920, 1080);
+        grad.addColorStop(0, '#4f46e5');
+        grad.addColorStop(0.5, '#7c3aed');
+        grad.addColorStop(1, '#06b6d4');
+        sCtx.fillStyle = grad;
+        sCtx.fillRect(0, 0, 1920, 1080);
+
+        // Draw geometric art
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+        for (let i = 0; i < 20; i++) {
+          sCtx.beginPath();
+          sCtx.arc(
+            (i * 120) % 1920,
+            (i * 95) % 1080,
+            40 + (i * 15),
+            0,
+            Math.PI * 2
+          );
+          sCtx.fill();
+        }
+
+        // Draw typography
+        sCtx.fillStyle = '#ffffff';
+        sCtx.font = 'bold 72px Inter, sans-serif';
+        sCtx.textAlign = 'center';
+        sCtx.fillText('OptiPixel Sample Artwork', 1920 / 2, 520);
+        sCtx.font = '32px Inter, sans-serif';
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        sCtx.fillText('1920 × 1080 • High-Quality 24-bit Canvas Source', 1920 / 2, 590);
+
+        sampleCanvas.toBlob((blob) => {
+          const sampleFile = new File([blob], 'sample_artwork.jpg', { type: 'image/jpeg' });
+          handleSelectedFile(sampleFile);
+        }, 'image/jpeg', 0.95);
+      });
+
+      // Process uploaded file
+      function handleSelectedFile(file) {
+        if (!file.type.startsWith('image/')) {
+          showToast('Please select a valid image file (JPG, PNG, WEBP, etc.)', 'error');
+          return;
+        }
+
+        currentFile = file;
+        originalSize = file.size;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          originalImage = new Image();
+          originalImage.onload = () => {
+            originalWidth = originalImage.naturalWidth;
+            originalHeight = originalImage.naturalHeight;
+            originalAspectRatio = originalWidth / originalHeight;
+
+            // Set up UI inputs
+            widthInput.value = originalWidth;
+            heightInput.value = originalHeight;
+
+            // Set up Original Stats
+            headerFileName.textContent = file.name;
+            headerFileInfo.textContent = `${originalWidth} × ${originalHeight} px • ${formatBytes(originalSize)}`;
+            origSizeDisplay.textContent = formatBytes(originalSize);
+            origDimDisplay.textContent = `${originalWidth} × ${originalHeight} px`;
+            origFormatDisplay.textContent = file.type.replace('image/', '').toUpperCase();
+
+            // Set up original preview image
+            origImgPreview.src = e.target.result;
+
+            // Show workspace
+            uploadSection.classList.add('hidden');
+            workspaceSection.classList.remove('hidden');
+
+            // Default target size heuristic: 50% of original or 100 KB whichever is smaller
+            const sensibleTargetKb = Math.max(20, Math.min(200, Math.round(originalSize / 1024 * 0.4)));
+            targetSizeInput.value = sensibleTargetKb;
+            targetSizeUnit.value = 'KB';
+
+            // Trigger compression
+            triggerOptimization();
+            showToast('Image loaded successfully!');
+          };
+          originalImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Reset App
+      resetBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        currentFile = null;
+        if (optimizedUrl) {
+          URL.revokeObjectURL(optimizedUrl);
+          optimizedUrl = null;
+        }
+        workspaceSection.classList.add('hidden');
+        uploadSection.classList.remove('hidden');
+      });
+
+      // Aspect Ratio Lock Toggle
+      aspectRatioLockBtn.addEventListener('click', () => {
+        isAspectRatioLocked = !isAspectRatioLocked;
+        if (isAspectRatioLocked) {
+          lockIcon.className = 'fa-solid fa-link';
+          lockStatusText.textContent = 'Ratio Locked';
+          aspectRatioLockBtn.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200 hover:bg-indigo-100 transition-colors';
+          // Recalculate height from width
+          const w = parseInt(widthInput.value, 10);
+          if (w > 0) {
+            heightInput.value = Math.max(1, Math.round(w / originalAspectRatio));
+            scheduleOptimization();
+          }
+        } else {
+          lockIcon.className = 'fa-solid fa-link-slash';
+          lockStatusText.textContent = 'Ratio Free';
+          aspectRatioLockBtn.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 font-medium border border-slate-200 hover:bg-slate-200 transition-colors';
+        }
+      });
+
+      // Dimension Input Handlers
+      widthInput.addEventListener('input', () => {
+        let w = parseInt(widthInput.value, 10);
+        if (isNaN(w) || w <= 0) return;
+        if (isAspectRatioLocked) {
+          heightInput.value = Math.max(1, Math.round(w / originalAspectRatio));
+        }
+        scheduleOptimization();
+      });
+
+      heightInput.addEventListener('input', () => {
+        let h = parseInt(heightInput.value, 10);
+        if (isNaN(h) || h <= 0) return;
+        if (isAspectRatioLocked) {
+          widthInput.value = Math.max(1, Math.round(h * originalAspectRatio));
+        }
+        scheduleOptimization();
+      });
+
+      // Dimension Preset Scale Buttons (100%, 75%, 50%, 25%)
+      document.querySelectorAll('.preset-scale-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const scale = parseFloat(btn.dataset.scale);
+          widthInput.value = Math.max(1, Math.round(originalWidth * scale));
+          heightInput.value = Math.max(1, Math.round(originalHeight * scale));
+          scheduleOptimization();
+        });
+      });
+
+      // Dimension Aspect Ratio / Specific Presets
+      document.querySelectorAll('.preset-dim-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const preset = btn.dataset.preset;
+          if (preset === 'square') {
+            widthInput.value = 1080;
+            heightInput.value = 1080;
+          } else if (preset === 'fhd') {
+            widthInput.value = 1920;
+            heightInput.value = 1080;
+          } else if (preset === 'passport') {
+            // Standard 35mm x 45mm ratio at standard resolution: 413 x 531 px
+            widthInput.value = 413;
+            heightInput.value = 531;
+          }
+          scheduleOptimization();
+        });
+      });
+
+      // Compression Mode Switch (Target vs Manual)
+      modeTargetBtn.addEventListener('click', () => {
+        activeMode = 'target';
+        modeTargetBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
+        modeManualBtn.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all font-semibold';
+        targetSizeModeContainer.classList.remove('hidden');
+        manualQualityModeContainer.classList.add('hidden');
+        scheduleOptimization();
+      });
+
+      modeManualBtn.addEventListener('click', () => {
+        activeMode = 'manual';
+        modeManualBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
+        modeTargetBtn.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all font-semibold';
+        manualQualityModeContainer.classList.remove('hidden');
+        targetSizeModeContainer.classList.add('hidden');
+        scheduleOptimization();
+      });
+
+      // Target size chips
+      document.querySelectorAll('.target-chip-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.target-chip-btn').forEach(b => {
+            b.className = 'target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors';
+          });
+          btn.className = 'target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-200';
+          targetSizeInput.value = btn.dataset.target;
+          targetSizeUnit.value = btn.dataset.unit;
+          scheduleOptimization();
+        });
+      });
+
+      targetSizeInput.addEventListener('input', scheduleOptimization);
+      targetSizeUnit.addEventListener('change', scheduleOptimization);
+      autoScaleDownToggle.addEventListener('change', scheduleOptimization);
+
+      // Manual Quality Slider
+      qualitySlider.addEventListener('input', () => {
+        qualityDisplay.textContent = `${qualitySlider.value}%`;
+        scheduleOptimization();
+      });
+
+      // Format Selection Radios
+      formatRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.value === 'application/pdf') {
+            pdfOptions.classList.remove('hidden');
+          } else {
+            pdfOptions.classList.add('hidden');
+          }
+          scheduleOptimization();
+        });
+      });
+
+      pdfPageSizeRadios.forEach(r => r.addEventListener('change', scheduleOptimization));
+
+      // View Mode Toggles (Single vs Side-by-Side)
+      viewOptimizedBtn.addEventListener('click', () => {
+        viewOptimizedBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
+        viewSideBySideBtn.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all font-semibold';
+        singlePreviewContainer.classList.remove('hidden');
+        sideBySideContainer.classList.add('hidden');
+      });
+
+      viewSideBySideBtn.addEventListener('click', () => {
+        viewSideBySideBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
+        viewOptimizedBtn.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all font-semibold';
+        sideBySideContainer.classList.remove('hidden');
+        singlePreviewContainer.classList.add('hidden');
+      });
+
+      reapplyBtn.addEventListener('click', triggerOptimization);
+
+      // Debounce scheduler to avoid freezing on rapid slider/input changes
+      function scheduleOptimization() {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          triggerOptimization();
+        }, 220);
+      }
+
+      // Helper: Canvas to Blob promise
+      function canvasToBlobPromise(canvas, mimeType, quality) {
+        return new Promise((resolve) => {
+          canvas.toBlob((blob) => {
+            resolve(blob);
+          }, mimeType, quality);
+        });
+      }
+
+      /**
+       * Core Engine: Smart Iterative Compression & Target Size Binary Search
+       */
+      async function triggerOptimization() {
+        if (!originalImage.src || isProcessing) return;
+        isProcessing = true;
+
+        processingOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        processingOverlay.classList.add('opacity-100');
+
+        try {
+          const reqWidth = Math.max(16, parseInt(widthInput.value, 10) || originalWidth);
+          const reqHeight = Math.max(16, parseInt(heightInput.value, 10) || originalHeight);
+          const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
+          const isPdf = selectedFormat === 'application/pdf';
+
+          // Determine target bytes if in Target Size mode
+          let targetBytes = Infinity;
+          if (activeMode === 'target') {
+            const rawVal = parseFloat(targetSizeInput.value) || 100;
+            const unit = targetSizeUnit.value;
+            targetBytes = unit === 'MB' ? rawVal * 1024 * 1024 : rawVal * 1024;
+          }
+
+          let curWidth = reqWidth;
+          let curHeight = reqHeight;
+          const allowAutoDownscale = autoScaleDownToggle.checked;
+
+          let bestBlob = null;
+          let bestQuality = 0.85;
+          let achievedDimensions = { width: curWidth, height: curHeight };
+          let noticeMessage = '';
+
+          // Format for canvas rendering
+          // If PDF is chosen, we compress to JPEG first, then pack inside PDF
+          const canvasMime = (selectedFormat === 'image/png' && !isPdf) ? 'image/png' : 'image/jpeg';
+
+          if (activeMode === 'manual') {
+            // Manual Quality Mode
+            const qualityRatio = parseInt(qualitySlider.value, 10) / 100;
+            offscreenCanvas.width = curWidth;
+            offscreenCanvas.height = curHeight;
+
+            // Fill white background for non-alpha exports
+            if (canvasMime === 'image/jpeg') {
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, curWidth, curHeight);
+            } else {
+              ctx.clearRect(0, 0, curWidth, curHeight);
+            }
+            ctx.drawImage(originalImage, 0, 0, curWidth, curHeight);
+
+            bestBlob = await canvasToBlobPromise(offscreenCanvas, canvasMime, qualityRatio);
+            bestQuality = qualityRatio;
+            noticeMessage = `Manual quality set to ${(qualityRatio * 100).toFixed(0)}%.`;
+          } else {
+            // Target File Size Mode: Iterative Binary Search on Canvas
+            // Reserve ~4 KB overhead for PDF headers if exporting as PDF
+            const effectiveTargetBytes = isPdf ? Math.max(1024, targetBytes - 4096) : targetBytes;
+
+            let scaleAttempt = 0;
+            const maxScaleAttempts = allowAutoDownscale ? 5 : 1;
+            let successUnderTarget = false;
+
+            while (scaleAttempt < maxScaleAttempts && !successUnderTarget) {
+              offscreenCanvas.width = curWidth;
+              offscreenCanvas.height = curHeight;
+
+              if (canvasMime === 'image/jpeg') {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, curWidth, curHeight);
+              } else {
+                ctx.clearRect(0, 0, curWidth, curHeight);
+              }
+              ctx.drawImage(originalImage, 0, 0, curWidth, curHeight);
+
+              if (canvasMime === 'image/png') {
+                // PNG is lossless in standard canvas. Size is directly controlled by pixel count.
+                bestBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
+                if (bestBlob.size <= effectiveTargetBytes || !allowAutoDownscale) {
+                  successUnderTarget = bestBlob.size <= effectiveTargetBytes;
+                  break;
+                } else {
+                  // Downscale resolution to fit PNG target size
+                  const ratio = Math.sqrt(effectiveTargetBytes / bestBlob.size) * 0.94;
+                  curWidth = Math.max(32, Math.round(curWidth * ratio));
+                  curHeight = Math.max(32, Math.round(curHeight * ratio));
+                  scaleAttempt++;
+                }
+              } else {
+                // JPEG Binary Search on Quality (0.02 to 1.0)
+                let low = 0.02;
+                let high = 1.0;
+                let iterations = 0;
+                let candidateBlob = null;
+                let candidateQuality = 0.75;
+
+                while (low <= high && iterations < 7) {
+                  const mid = (low + high) / 2;
+                  const b = await canvasToBlobPromise(offscreenCanvas, 'image/jpeg', mid);
+                  iterations++;
+
+                  if (b.size <= effectiveTargetBytes) {
+                    candidateBlob = b;
+                    candidateQuality = mid;
+                    // Try higher quality while still under target
+                    low = mid + 0.05;
+                  } else {
+                    // Too big, reduce quality
+                    high = mid - 0.05;
+                  }
+                }
+
+                if (!candidateBlob) {
+                  // Even at lowest quality, file was larger than target
+                  candidateBlob = await canvasToBlobPromise(offscreenCanvas, 'image/jpeg', 0.02);
+                  candidateQuality = 0.02;
+                }
+
+                if (candidateBlob.size <= effectiveTargetBytes) {
+                  bestBlob = candidateBlob;
+                  bestQuality = candidateQuality;
+                  successUnderTarget = true;
+                  break;
+                } else {
+                  // Still too large at min quality. Auto-downscale canvas resolution if enabled.
+                  bestBlob = candidateBlob;
+                  bestQuality = candidateQuality;
+                  if (allowAutoDownscale && curWidth > 64 && curHeight > 64) {
+                    const ratio = Math.sqrt(effectiveTargetBytes / candidateBlob.size) * 0.95;
+                    curWidth = Math.max(32, Math.round(curWidth * ratio));
+                    curHeight = Math.max(32, Math.round(curHeight * ratio));
+                    scaleAttempt++;
+                  } else {
+                    break;
+                  }
+                }
+              }
+            }
+
+            achievedDimensions = { width: curWidth, height: curHeight };
+
+            if (bestBlob.size <= effectiveTargetBytes) {
+              if (curWidth !== reqWidth || curHeight !== reqHeight) {
+                noticeMessage = `Target reached by adjusting quality and scaling to ${curWidth}×${curHeight} px.`;
+              } else {
+                noticeMessage = `Exact target reached at original dimensions with ${(bestQuality * 100).toFixed(0)}% quality.`;
+              }
+            } else {
+              noticeMessage = `Target reached as closely as possible (${formatBytes(bestBlob.size)}). Enable Auto-Downscale to shrink further.`;
+            }
+          }
+
+          // Handle PDF output if selected
+          if (isPdf) {
+            const { jsPDF } = window.jspdf;
+            const pdfPageMode = document.querySelector('input[name="pdfPageSize"]:checked').value;
+            
+            // Read compressed jpeg data URL for PDF embedding
+            const imgDataUrl = await new Promise((res) => {
+              const r = new FileReader();
+              r.onload = () => res(r.target.result);
+              r.readAsDataURL(bestBlob);
+            });
+
+            let doc;
+            if (pdfPageMode === 'fit') {
+              // Custom PDF page matching image resolution (points)
+              doc = new jsPDF({
+                orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
+                unit: 'px',
+                format: [achievedDimensions.width, achievedDimensions.height]
+              });
+              doc.addImage(imgDataUrl, 'JPEG', 0, 0, achievedDimensions.width, achievedDimensions.height);
+              pdfPageInfo.textContent = `Fit Page: ${achievedDimensions.width} × ${achievedDimensions.height} px`;
+            } else {
+              // Standard A4 sheet
+              doc = new jsPDF({
+                orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
+                unit: 'mm',
+                format: 'a4'
+              });
+              const pageWidth = doc.internal.pageSize.getWidth();
+              const pageHeight = doc.internal.pageSize.getHeight();
+              const margin = 10;
+              const usableW = pageWidth - (margin * 2);
+              const usableH = pageHeight - (margin * 2);
+
+              const imgAspect = achievedDimensions.width / achievedDimensions.height;
+              let renderW = usableW;
+              let renderH = usableW / imgAspect;
+
+              if (renderH > usableH) {
+                renderH = usableH;
+                renderW = usableH * imgAspect;
+              }
+
+              const posX = margin + (usableW - renderW) / 2;
+              const posY = margin + (usableH - renderH) / 2;
+
+              doc.addImage(imgDataUrl, 'JPEG', posX, posY, renderW, renderH);
+              pdfPageInfo.textContent = `Standard A4 (${doc.internal.pageSize.getWidth()} × ${doc.internal.pageSize.getHeight()} mm)`;
+            }
+
+            optimizedBlob = doc.output('blob');
+          } else {
+            optimizedBlob = bestBlob;
+          }
+
+          // Release previous object URL
+          if (optimizedUrl) {
+            URL.revokeObjectURL(optimizedUrl);
+          }
+          optimizedUrl = URL.createObjectURL(optimizedBlob);
+
+          // Update Previews
+          if (isPdf) {
+            pdfMockPreview.classList.remove('hidden');
+            optimizedImgPreview.classList.add('hidden');
+            optimizedImgPreviewSplit.src = URL.createObjectURL(bestBlob);
+          } else {
+            pdfMockPreview.classList.add('hidden');
+            optimizedImgPreview.classList.remove('hidden');
+            optimizedImgPreview.src = optimizedUrl;
+            optimizedImgPreviewSplit.src = optimizedUrl;
+          }
+
+          // Update Stats
+          const newSize = optimizedBlob.size;
+          newSizeDisplay.textContent = formatBytes(newSize);
+          newDimDisplay.textContent = `${achievedDimensions.width} × ${achievedDimensions.height} px`;
+          canvasDimLabel.textContent = `${achievedDimensions.width} × ${achievedDimensions.height} px`;
+
+          let formatLabel = isPdf ? 'PDF Document' : (selectedFormat === 'image/png' ? 'PNG (Lossless)' : `JPG (Quality ${Math.round(bestQuality * 100)}%)`);
+          newFormatDisplay.textContent = formatLabel;
+
+          // Savings badge
+          const savedBytes = originalSize - newSize;
+          const savedPercent = ((savedBytes / originalSize) * 100).toFixed(1);
+          if (savedBytes > 0) {
+            savingsPercentageBadge.textContent = `-${savedPercent}%`;
+            savingsPercentageBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white';
+          } else {
+            const addedPercent = (Math.abs(savedBytes) / originalSize * 100).toFixed(1);
+            savingsPercentageBadge.textContent = `+${addedPercent}%`;
+            savingsPercentageBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-amber-600 text-white';
+          }
+
+          // Target reached check
+          if (activeMode === 'target') {
+            if (newSize <= targetBytes) {
+              targetSuccessBadge.classList.remove('hidden');
+              targetSuccessBadge.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800';
+              targetSuccessBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Target Reached';
+            } else {
+              targetSuccessBadge.classList.remove('hidden');
+              targetSuccessBadge.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800';
+              targetSuccessBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Near Target';
+            }
+          } else {
+            targetSuccessBadge.classList.add('hidden');
+          }
+
+          algorithmNoticeText.textContent = noticeMessage;
+
+          // Download button text
+          downloadBtnText.textContent = `Download ${formatBytes(newSize)} ${isPdf ? 'PDF' : selectedFormat.replace('image/', '').toUpperCase()}`;
+
+        } catch (error) {
+          console.error('Optimization error:', error);
+          showToast('An error occurred during compression.', 'error');
+        } finally {
+          isProcessing = false;
+          processingOverlay.classList.remove('opacity-100');
+          processingOverlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+      }
+
+      // Download Action
+      downloadBtn.addEventListener('click', () => {
+        if (!optimizedBlob) {
+          showToast('No processed image to download.', 'error');
+          return;
+        }
+
+        const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
+        let ext = 'jpg';
+        if (selectedFormat === 'image/png') ext = 'png';
+        if (selectedFormat === 'application/pdf') ext = 'pdf';
+
+        const originalBase = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : 'image';
+        const filename = `optimized_${originalBase}.${ext}`;
+
+        const a = document.createElement('a');
+        a.href = optimizedUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        showToast(`Saved ${filename} to local device!`);
+      });
+
+      // Copy Image to Clipboard Action
+      copyClipboardBtn.addEventListener('click', async () => {
+        if (!optimizedBlob) return;
+        const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
+
+        if (selectedFormat === 'application/pdf') {
+          showToast('PDFs cannot be directly copied to clipboard. Please use Download.', 'info');
+          return;
+        }
+
+        try {
+          if (navigator.clipboard && window.ClipboardItem) {
+            // Browsers strictly support PNG in ClipboardItem
+            let copyBlob = optimizedBlob;
+            if (optimizedBlob.type !== 'image/png') {
+              // Convert canvas to PNG blob for clipboard compatibility
+              copyBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
+            }
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': copyBlob })
+            ]);
+            showToast('Optimized image copied to clipboard!');
+          } else {
+            showToast('Clipboard image copying is not supported in this browser.', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Unable to copy image. Please use Download instead.', 'error');
+        }
+      });
+
+    });
+  </script>
+</body>
+</html>
