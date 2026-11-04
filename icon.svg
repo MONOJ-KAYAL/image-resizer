@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+
+    <!-- Center Glow Gradient -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+
+    <!-- Subtle Drop Shadow -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#1e1b4b" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Base Squircle -->
+  <rect width="512" height="512" rx="120" fill="url(#bgGrad)" />
+
+  <!-- Frosted Glass Card Layer -->
+  <rect x="76" y="76" width="360" height="360" rx="64" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-width="2" stroke-opacity="0.2" />
+
+  <!-- Inner Compression & Frame Core (Grouped with Shadow) -->
+  <g filter="url(#softGlow)">
+    <!-- Dimension & Crop Corner Brackets -->
+    <path d="M 148 200 V 156 A 8 8 0 0 1 156 148 H 200" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 312 148 H 356 A 8 8 0 0 1 364 156 V 200" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 148 312 V 356 A 8 8 0 0 0 156 364 H 200" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M 312 364 H 356 A 8 8 0 0 0 364 356 V 312" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Converging Compression Arrows -->
+    <!-- Top-Left pointing to center -->
+    <path d="M 190 190 L 230 230 M 230 205 V 230 H 205" fill="none" stroke="url(#accentGrad)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Bottom-Right pointing to center -->
+    <path d="M 322 322 L 282 282 M 282 307 V 282 H 307" fill="none" stroke="url(#accentGrad)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Center Target Node -->
+    <circle cx="256" cy="256" r="16" fill="#38bdf8" />
+  </g>
+</svg>
