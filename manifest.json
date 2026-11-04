@@ -2,8 +2,8 @@
   "name": "OptiPixel Pro - Accurate Image Resizer",
   "short_name": "OptiPixel",
   "description": "Accurate image resizer and target file size reducer",
-  "id": "./",
-  "start_url": "./",
+  "id": "optipixel-app",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
@@ -14,13 +14,19 @@
       "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "./icon.svg",
