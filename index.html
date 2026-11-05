@@ -20,7 +20,7 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- jsPDF for PDF generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- Google Fonts Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1113,53 +1113,69 @@
           }
 
           // Handle PDF Output
+          // Handle PDF Output
           if (isPdf) {
-            const { jsPDF } = window.jspdf;
-            const pdfPageMode = document.querySelector('input[name="pdfPageSize"]:checked').value;
-            
-            const imgDataUrl = await new Promise((res) => {
-              const r = new FileReader();
-              r.onload = () => res(r.target.result);
-              r.readAsDataURL(bestBlob);
-            });
+            // Check if jsPDF loaded correctly from CDN
+            const jspdfModule = window.jspdf;
+            if (!jspdfModule || !jspdfModule.jsPDF) {
+              throw new Error("jsPDF library not loaded. Check internet connection.");
+            }
+            const { jsPDF } = jspdfModule;
+
+            // Get selected page mode (fit vs standard A4)
+            const pdfPageModeInput = document.querySelector('input[name="pdfPageSize"]:checked');
+            const pdfPageMode = pdfPageModeInput ? pdfPageModeInput.value : 'fit';
+
+            // Get JPEG DataURL directly from offscreen canvas for reliable PDF injection
+            const imgDataUrl = offscreenCanvas.toDataURL('image/jpeg', bestQuality);
 
             let doc;
+            const imgW = achievedDimensions.width;
+            const imgH = achievedDimensions.height;
+            const isLandscape = imgW > imgH;
+
             if (pdfPageMode === 'fit') {
+              // Custom PDF dimensions matching pixel boundaries
               doc = new jsPDF({
-                orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
-                unit: 'px',
-                format: [achievedDimensions.width, achievedDimensions.height]
+                orientation: isLandscape ? 'l' : 'p',
+                unit: 'pt',
+                format: [imgW, imgH],
+                compress: true
               });
-              doc.addImage(imgDataUrl, 'JPEG', 0, 0, achievedDimensions.width, achievedDimensions.height);
-              pdfPageInfo.textContent = 'Fit to Image: ' + achievedDimensions.width + ' × ' + achievedDimensions.height + ' px';
+              doc.addImage(imgDataUrl, 'JPEG', 0, 0, imgW, imgH, undefined, 'FAST');
+              pdfPageInfo.textContent = 'Fit to Image: ' + imgW + ' × ' + imgH + ' px';
             } else {
+              // Standard A4 sheet (210 x 297 mm)
               doc = new jsPDF({
-                orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
+                orientation: isLandscape ? 'l' : 'p',
                 unit: 'mm',
-                format: 'a4'
+                format: 'a4',
+                compress: true
               });
+
               const pageWidth = doc.internal.pageSize.getWidth();
               const pageHeight = doc.internal.pageSize.getHeight();
               const margin = 10;
-              const usableW = pageWidth - (margin * 2);
-              const usableH = pageHeight - (margin * 2);
+              const maxW = pageWidth - (margin * 2);
+              const maxH = pageHeight - (margin * 2);
 
-              const imgAspect = achievedDimensions.width / achievedDimensions.height;
-              let renderW = usableW;
-              let renderH = usableW / imgAspect;
+              const imgAspect = imgW / imgH;
+              let renderW = maxW;
+              let renderH = maxW / imgAspect;
 
-              if (renderH > usableH) {
-                renderH = usableH;
-                renderW = usableH * imgAspect;
+              if (renderH > maxH) {
+                renderH = maxH;
+                renderW = maxH * imgAspect;
               }
 
-              const posX = margin + (usableW - renderW) / 2;
-              const posY = margin + (usableH - renderH) / 2;
+              const posX = margin + (maxW - renderW) / 2;
+              const posY = margin + (maxH - renderH) / 2;
 
-              doc.addImage(imgDataUrl, 'JPEG', posX, posY, renderW, renderH);
+              doc.addImage(imgDataUrl, 'JPEG', posX, posY, renderW, renderH, undefined, 'FAST');
               pdfPageInfo.textContent = 'Standard A4 Sheet (210 × 297 mm)';
             }
 
+            // Generate compliant PDF Blob
             optimizedBlob = doc.output('blob');
           } else {
             optimizedBlob = bestBlob;
@@ -1239,7 +1255,7 @@
       // Download Action
       downloadBtn.addEventListener('click', () => {
         if (!optimizedBlob) {
-          showToast('No processed image to download.', 'error');
+          showToast('No processed file to download.', 'error');
           return;
         }
 
@@ -1247,15 +1263,27 @@
         if (selectedFormat === 'image/png') ext = 'png';
         if (selectedFormat === 'application/pdf') ext = 'pdf';
 
-        const originalBase = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : 'image';
+        const originalBase = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : 'document';
         const filename = 'optimized_' + originalBase + '.' + ext;
 
+        // Force explicit MIME type for PDF download triggers
+        const downloadBlob = (ext === 'pdf') 
+          ? new Blob([optimizedBlob], { type: 'application/pdf' }) 
+          : optimizedBlob;
+
+        const downloadUrl = URL.createObjectURL(downloadBlob);
         const a = document.createElement('a');
-        a.href = optimizedUrl;
+        a.style.display = 'none';
+        a.href = downloadUrl;
         a.download = filename;
+
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(downloadUrl);
+        }, 1000);
 
         showToast('Saved ' + filename + ' to local device storage!');
       });
