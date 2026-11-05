@@ -1,4 +1,4 @@
-const CACHE_NAME = 'optipixel-v3';
+const CACHE_NAME = 'Resizer-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

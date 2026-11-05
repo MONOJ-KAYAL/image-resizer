@@ -1,8 +1,8 @@
 {
-  "name": "OptiPixel Pro - Accurate Image Resizer",
-  "short_name": "OptiPixel",
+  "name": "Resizer Pro - Accurate Image Resizer",
+  "short_name": "Resizer",
   "description": "Accurate image resizer and target file size reducer",
-  "id": "optipixel-app",
+  "id": "resizer-app",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
