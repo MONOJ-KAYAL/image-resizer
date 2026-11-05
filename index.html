@@ -8,10 +8,11 @@
   <!-- PWA Meta Tags & Manifest -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4f46e5">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="OptiPixel">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
 
   <!-- Tailwind CSS -->
@@ -71,7 +72,7 @@
     <span id="toastMessage">Success message</span>
   </div>
 
-  <!-- PWA Install Prompt Banner (Visible when browser triggers installability) -->
+  <!-- PWA Install Prompt Banner -->
   <div id="installBanner" class="hidden bg-indigo-600 text-white px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between sticky top-0 z-50 shadow-md">
     <div class="flex items-center gap-2">
       <i class="fa-solid fa-download"></i>
@@ -91,17 +92,17 @@
       <div class="max-w-3xl mx-auto mt-6">
         <div class="text-center mb-6">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-3 border border-indigo-200">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 100% Client-Side Private
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 100% Client-Side Private • Portal Compatible
           </div>
-          <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Accurate Image Resizer & Target Size Reducer</h1>
+          <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Image Resizer & Target Size Reducer</h1>
           <p class="text-slate-500 text-sm sm:text-base mt-2 max-w-xl mx-auto">
-            Reduce file size strictly under exact KB or MB limits (20 KB, 50 KB, 100 KB) and customize dimensions for portal applications, IDs, and social media.
+            Reduce file size strictly under exact KB or MB limits (20 KB, 50 KB, 100 KB) and convert to JPG, PNG, or PDF for government and job portal submissions.
           </p>
         </div>
 
         <!-- Drop Box -->
         <div id="dropZone" class="group relative border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-3xl p-8 sm:p-12 text-center bg-white transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md">
-          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/bmp,image/gif" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+          <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
           
           <div class="flex flex-col items-center">
             <div class="w-20 h-20 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-200">
@@ -111,18 +112,18 @@
               Drop your image here, or <span class="text-indigo-600 underline decoration-2 underline-offset-4">browse files</span>
             </h3>
             <p class="text-xs sm:text-sm text-slate-400 mt-1.5">
-              Supports JPG, PNG, WEBP, GIF, BMP
+              Supports any format (JPG, PNG, WEBP, GIF, BMP, TIFF)
             </p>
 
             <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
               <span class="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                <i class="fa-solid fa-bolt text-amber-500 mr-1.5"></i> Instant processing
+                <i class="fa-solid fa-stamp text-indigo-500 mr-1.5"></i> Govt & Exam Portal Ready
               </span>
               <span class="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                <i class="fa-solid fa-lock text-emerald-500 mr-1.5"></i> Never uploads to a server
+                <i class="fa-solid fa-lock text-emerald-500 mr-1.5"></i> 100% Client-Side Privacy
               </span>
               <span class="inline-flex items-center text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                <i class="fa-solid fa-bullseye text-indigo-500 mr-1.5"></i> Exact target KB matching
+                <i class="fa-solid fa-bullseye text-amber-500 mr-1.5"></i> Exact Target KB Matching
               </span>
             </div>
           </div>
@@ -131,7 +132,7 @@
         <!-- Try Sample Button -->
         <div class="text-center mt-5">
           <button id="sampleImageBtn" class="text-xs text-slate-500 hover:text-indigo-600 inline-flex items-center gap-1.5 font-medium transition-colors">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Don't have an image ready? Try with a sample image
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Don't have an image ready? Try with a sample artwork
           </button>
         </div>
       </div>
@@ -164,8 +165,129 @@
         
         <!-- Controls Column -->
         <div class="lg:col-span-5 space-y-5">
+
+          <!-- Box 1: Output Format Selection -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-file-export text-indigo-600"></i> Output Format
+              </h3>
+              <span id="formatBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                Converting to JPG
+              </span>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2" id="formatRadioGroup">
+              <!-- JPG Option -->
+              <button type="button" data-format="image/jpeg" class="format-btn p-3 text-center rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold text-xs transition-all shadow-xs">
+                <i class="fa-regular fa-file-image text-base mb-1 block"></i>
+                <span>JPG / JPEG</span>
+                <span class="block text-[10px] text-indigo-600/70 font-normal mt-0.5">Most Portals</span>
+              </button>
+
+              <!-- PNG Option -->
+              <button type="button" data-format="image/png" class="format-btn p-3 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-xs hover:bg-slate-100 transition-all">
+                <i class="fa-solid fa-file-image text-base mb-1 block"></i>
+                <span>PNG</span>
+                <span class="block text-[10px] text-slate-400 font-normal mt-0.5">Lossless</span>
+              </button>
+
+              <!-- PDF Option -->
+              <button type="button" data-format="application/pdf" class="format-btn p-3 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-xs hover:bg-slate-100 transition-all">
+                <i class="fa-solid fa-file-pdf text-base mb-1 block"></i>
+                <span>PDF</span>
+                <span class="block text-[10px] text-slate-400 font-normal mt-0.5">Documents</span>
+              </button>
+            </div>
+
+            <!-- PDF Page Setup -->
+            <div id="pdfOptions" class="hidden p-3.5 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2.5 text-xs text-slate-700">
+              <div class="font-bold text-indigo-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-indigo-600"></i> PDF Document Page Layout
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="radio" name="pdfPageSize" value="fit" checked class="text-indigo-600 focus:ring-indigo-500">
+                  <span class="font-medium text-slate-800">Fit to Image</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer">
+                  <input type="radio" name="pdfPageSize" value="a4" class="text-indigo-600 focus:ring-indigo-500">
+                  <span class="font-medium text-slate-800">Standard A4 Sheet</span>
+                </label>
+              </div>
+            </div>
+          </div>
           
-          <!-- Box 1: Dimensions -->
+          <!-- Box 2: Target File Size & Quality -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-compress text-indigo-600"></i> Target Size & Limit
+              </h3>
+              
+              <div class="inline-flex p-0.5 bg-slate-100 rounded-lg text-xs font-semibold">
+                <button id="modeTargetBtn" class="px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all">Exact Target</button>
+                <button id="modeManualBtn" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all">Manual Quality</button>
+              </div>
+            </div>
+
+            <!-- Mode A: Target Size -->
+            <div id="targetSizeModeContainer" class="space-y-3">
+              <div>
+                <label for="targetSizeInput" class="block text-xs font-medium text-slate-600 mb-1">
+                  Specify Exact Maximum Target Size
+                </label>
+                <div class="flex gap-2">
+                  <div class="relative flex-1">
+                    <input type="number" id="targetSizeInput" min="1" step="1" value="50" class="w-full px-3 py-2 text-sm font-semibold rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50" placeholder="e.g. 50">
+                  </div>
+                  <select id="targetSizeUnit" class="px-3 py-2 text-sm font-semibold rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 focus:outline-none focus:border-indigo-600">
+                    <option value="KB" selected>KB</option>
+                    <option value="MB">MB</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Quick Target Chips -->
+              <div class="space-y-1.5">
+                <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Quick Target Sizes</div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button data-target="20" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">20 KB</button>
+                  <button data-target="50" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">50 KB</button>
+                  <button data-target="100" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">100 KB</button>
+                  <button data-target="200" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">200 KB</button>
+                  <button data-target="500" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">500 KB</button>
+                  <button data-target="1" data-unit="MB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">1 MB</button>
+                </div>
+              </div>
+
+              <!-- Smart Auto Downscale Checkbox -->
+              <div class="pt-2 border-t border-slate-100">
+                <label class="flex items-start gap-2 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" id="autoScaleDownToggle" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
+                  <span>
+                    <strong>Smart Auto-Downscale:</strong> Automatically adapt resolution if image cannot fit target size through quality compression alone.
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Mode B: Manual Quality -->
+            <div id="manualQualityModeContainer" class="hidden space-y-3">
+              <div class="flex items-center justify-between">
+                <label for="qualitySlider" class="text-xs font-medium text-slate-600">Compression Quality</label>
+                <span id="qualityDisplay" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">80%</span>
+              </div>
+              <input type="range" id="qualitySlider" min="1" max="100" value="80" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                <span>Smallest File (1%)</span>
+                <span>Balanced (80%)</span>
+                <span>Maximum (100%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Box 3: Dimensions & Govt Presets -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -195,144 +317,51 @@
               </div>
             </div>
 
-            <!-- Presets -->
-            <div>
-              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Quick Scale & Presets</div>
+            <!-- Govt Portal One-Click Presets -->
+            <div class="p-3 bg-amber-50/60 rounded-xl border border-amber-200 space-y-2">
+              <div class="text-[11px] font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1">
+                <i class="fa-solid fa-award text-amber-600"></i> Govt Portal Presets (UPSC/SSC/State)
+              </div>
               <div class="flex flex-wrap gap-1.5">
-                <button data-scale="1" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">Original</button>
+                <button data-portal="passport" class="portal-preset-btn text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 font-semibold text-slate-700 border border-amber-200 transition-all shadow-2xs">
+                  📸 Passport Photo (350×450 px • 20-50 KB)
+                </button>
+                <button data-portal="signature" class="portal-preset-btn text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 font-semibold text-slate-700 border border-amber-200 transition-all shadow-2xs">
+                  ✍️ Signature (300×120 px • 10-20 KB)
+                </button>
+                <button data-portal="document" class="portal-preset-btn text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 font-semibold text-slate-700 border border-amber-200 transition-all shadow-2xs">
+                  📄 Doc/Cert (A4 • Max 200 KB PDF)
+                </button>
+              </div>
+            </div>
+
+            <!-- General Dimension Presets -->
+            <div>
+              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">General Scale Presets</div>
+              <div class="flex flex-wrap gap-1.5">
+                <button data-scale="1" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">100%</button>
                 <button data-scale="0.75" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">75%</button>
                 <button data-scale="0.5" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">50%</button>
                 <button data-scale="0.25" class="preset-scale-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">25%</button>
-                <button data-preset="square" class="preset-dim-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">1080×1080 (1:1)</button>
-                <button data-preset="fhd" class="preset-dim-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">1920×1080 (16:9)</button>
-                <button data-preset="passport" class="preset-dim-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">Passport (3.5×4.5)</button>
+                <button data-dim="1080,1080" class="preset-dim-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">1:1 Square</button>
+                <button data-dim="1920,1080" class="preset-dim-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-all">16:9 FHD</button>
               </div>
             </div>
           </div>
 
-          <!-- Box 2: Target File Size & Quality -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <i class="fa-solid fa-compress text-indigo-600"></i> Size & Compression
-              </h3>
-              
-              <div class="inline-flex p-0.5 bg-slate-100 rounded-lg text-xs font-semibold">
-                <button id="modeTargetBtn" class="px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all">Target Size</button>
-                <button id="modeManualBtn" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all">Manual Quality</button>
-              </div>
-            </div>
-
-            <!-- Target Size Mode -->
-            <div id="targetSizeModeContainer" class="space-y-3">
-              <div>
-                <label for="targetSizeInput" class="block text-xs font-medium text-slate-600 mb-1">
-                  Specify Exact Maximum Target Size
-                </label>
-                <div class="flex gap-2">
-                  <div class="relative flex-1">
-                    <input type="number" id="targetSizeInput" min="1" step="1" value="100" class="w-full px-3 py-2 text-sm font-semibold rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50" placeholder="e.g. 50">
-                  </div>
-                  <select id="targetSizeUnit" class="px-3 py-2 text-sm font-semibold rounded-xl border border-slate-200 bg-slate-50/50 text-slate-700 focus:outline-none focus:border-indigo-600">
-                    <option value="KB" selected>KB</option>
-                    <option value="MB">MB</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Quick Target Chips -->
-              <div class="flex flex-wrap gap-1.5 pt-1">
-                <button data-target="20" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">20 KB</button>
-                <button data-target="50" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">50 KB</button>
-                <button data-target="100" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">100 KB</button>
-                <button data-target="200" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">200 KB</button>
-                <button data-target="500" data-unit="KB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">500 KB</button>
-                <button data-target="1" data-unit="MB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">1 MB</button>
-                <button data-target="2" data-unit="MB" class="target-chip-btn text-xs px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 font-medium text-slate-600 transition-colors">2 MB</button>
-              </div>
-
-              <div class="pt-2 border-t border-slate-100">
-                <label class="flex items-start gap-2 text-xs text-slate-600 cursor-pointer">
-                  <input type="checkbox" id="autoScaleDownToggle" checked class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
-                  <span>
-                    <strong>Smart Auto-Downscale:</strong> Automatically scale down resolution if the target KB cannot be met by compression alone.
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Manual Quality Mode -->
-            <div id="manualQualityModeContainer" class="hidden space-y-3">
-              <div class="flex items-center justify-between">
-                <label for="qualitySlider" class="text-xs font-medium text-slate-600">Compression Quality</label>
-                <span id="qualityDisplay" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">80%</span>
-              </div>
-              <input type="range" id="qualitySlider" min="1" max="100" value="80" class="w-full h-2 bg-slate-200 rounded-lg cursor-pointer">
-              <div class="flex justify-between text-[11px] text-slate-400 font-medium">
-                <span>Smallest File (1%)</span>
-                <span>Balanced (80%)</span>
-                <span>Maximum (100%)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Box 3: Output Format -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <i class="fa-solid fa-file-export text-indigo-600"></i> Output Format
-            </h3>
-            
-            <div class="grid grid-cols-3 gap-2">
-              <label class="cursor-pointer">
-                <input type="radio" name="formatOption" value="image/jpeg" checked class="peer sr-only">
-                <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
-                  <i class="fa-regular fa-file-image text-base mb-1 block"></i> JPG
-                </div>
-              </label>
-
-              <label class="cursor-pointer">
-                <input type="radio" name="formatOption" value="image/png" class="peer sr-only">
-                <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
-                  <i class="fa-solid fa-file-image text-base mb-1 block"></i> PNG
-                </div>
-              </label>
-
-              <label class="cursor-pointer">
-                <input type="radio" name="formatOption" value="application/pdf" class="peer sr-only">
-                <div class="p-3 text-center rounded-xl border border-slate-200 bg-slate-50 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all font-semibold text-xs">
-                  <i class="fa-solid fa-file-pdf text-base mb-1 block"></i> PDF Document
-                </div>
-              </label>
-            </div>
-
-            <!-- PDF Options -->
-            <div id="pdfOptions" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs text-slate-600">
-              <div class="font-semibold text-slate-800 flex items-center gap-1.5">
-                <i class="fa-solid fa-sliders text-indigo-600"></i> PDF Page Setup
-              </div>
-              <div class="flex gap-4">
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input type="radio" name="pdfPageSize" value="fit" checked class="text-indigo-600">
-                  <span>Match Image Size</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input type="radio" name="pdfPageSize" value="a4" class="text-indigo-600">
-                  <span>Standard A4 Sheet</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Box 4: Action Buttons -->
+          <!-- Box 4: Action & Download -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
-            <button id="downloadBtn" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-sm shadow-md shadow-indigo-200 flex items-center justify-center gap-2 transition-all active:scale-[0.99]">
-              <i class="fa-solid fa-download"></i>
-              <span id="downloadBtnText">Download Optimized Image</span>
+            <button id="downloadBtn" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-sm shadow-md shadow-indigo-200 flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.99]">
+              <div class="flex items-center gap-2 text-base">
+                <i class="fa-solid fa-download"></i>
+                <span id="downloadBtnText">Download File</span>
+              </div>
+              <span id="downloadBtnSubtext" class="text-[11px] font-normal text-indigo-100">Portal Ready Format</span>
             </button>
 
             <div class="grid grid-cols-2 gap-2">
               <button id="copyClipboardBtn" class="py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors">
-                <i class="fa-regular fa-clipboard"></i> Copy to Clipboard
+                <i class="fa-regular fa-clipboard"></i> Copy Image
               </button>
               <button id="reapplyBtn" class="py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors">
                 <i class="fa-solid fa-rotate"></i> Re-Calculate
@@ -352,14 +381,14 @@
                 <i class="fa-solid fa-chart-simple text-indigo-600"></i> Optimization Result
               </h3>
               <div id="targetSuccessBadge" class="hidden inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">
-                <i class="fa-solid fa-circle-check text-emerald-600"></i> Target Reached
+                <i class="fa-solid fa-circle-check text-emerald-600"></i> Portal Validated
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <!-- Original Stats -->
               <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Original Image</span>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Source Image</span>
                 <div id="origSizeDisplay" class="text-lg font-extrabold text-slate-800">0 KB</div>
                 <div class="text-xs text-slate-500 mt-1 flex flex-col gap-0.5">
                   <span id="origDimDisplay">0 × 0 px</span>
@@ -370,13 +399,13 @@
               <!-- Optimized Stats -->
               <div class="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Optimized File</span>
+                  <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">Target Output</span>
                   <span id="savingsPercentageBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white">-0%</span>
                 </div>
                 <div id="newSizeDisplay" class="text-lg font-extrabold text-indigo-900">0 KB</div>
                 <div class="text-xs text-indigo-700/80 mt-1 flex flex-col gap-0.5">
                   <span id="newDimDisplay">0 × 0 px</span>
-                  <span id="newFormatDisplay" class="capitalize text-[11px]">JPG (Quality 85%)</span>
+                  <span id="newFormatDisplay" class="capitalize text-[11px] font-semibold">JPG</span>
                 </div>
               </div>
             </div>
@@ -384,7 +413,7 @@
             <!-- Algorithm status message -->
             <div id="algorithmNotice" class="mt-3 text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center gap-2">
               <i class="fa-solid fa-circle-info text-indigo-500"></i>
-              <span id="algorithmNoticeText">Target size calculated accurately via iterative binary search.</span>
+              <span id="algorithmNoticeText">Ready for processing.</span>
             </div>
           </div>
 
@@ -406,18 +435,20 @@
               <!-- Processing Spinner Overlay -->
               <div id="processingOverlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-2 transition-opacity duration-200 opacity-0 pointer-events-none">
                 <div class="w-9 h-9 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                <span class="text-xs font-bold text-slate-700">Compressing & optimizing...</span>
+                <span class="text-xs font-bold text-slate-700">Converting & compressing...</span>
               </div>
 
               <!-- Single View -->
               <div id="singlePreviewContainer" class="w-full h-full flex items-center justify-center">
                 <img id="optimizedImgPreview" class="max-w-full max-h-[480px] object-contain rounded-lg shadow-sm" alt="Optimized Preview">
+                
+                <!-- PDF Mock View -->
                 <div id="pdfMockPreview" class="hidden flex flex-col items-center justify-center p-8 bg-white border border-slate-200 rounded-xl shadow-md text-center max-w-sm">
-                  <div class="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-3xl mb-3">
+                  <div class="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-3xl mb-3 shadow-inner">
                     <i class="fa-solid fa-file-pdf"></i>
                   </div>
-                  <h4 class="text-sm font-bold text-slate-800">PDF Document Ready</h4>
-                  <p class="text-xs text-slate-500 mt-1">Image embedded into standard PDF page with requested compression.</p>
+                  <h4 class="text-sm font-bold text-slate-800">PDF Document Compiled</h4>
+                  <p class="text-xs text-slate-500 mt-1">Image embedded into standard PDF page with strict portal size constraints.</p>
                   <span id="pdfPageInfo" class="mt-3 text-xs bg-slate-100 text-slate-700 font-mono px-2.5 py-1 rounded-lg">Fit to image</span>
                 </div>
               </div>
@@ -441,8 +472,8 @@
             </div>
 
             <div class="text-[11px] text-slate-400 flex items-center justify-between">
-              <span>Canvas renderer applies clean white fill behind alpha when exporting to JPG or PDF.</span>
-              <span id="canvasDimLabel" class="font-mono text-slate-500">1920 × 1080</span>
+              <span>Clean white canvas applied behind alpha when converting to JPG or PDF.</span>
+              <span id="canvasDimLabel" class="font-mono text-slate-500">0 × 0 px</span>
             </div>
           </div>
 
@@ -455,13 +486,13 @@
   </main>
 
   <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-xs text-slate-400">
-    <p>OptiPixel • Accurate Image Resizer & File Size Compressor</p>
+    <p>OptiPixel • 100% Client-Side Private Image Resizer & File Size Compressor</p>
   </footer>
 
   <canvas id="offscreenCanvas" class="hidden"></canvas>
 
   <script>
-    // PWA Service Worker Registration & Installation Prompt
+    // PWA Service Worker Registration & Installation Prompt Handling
     let deferredPrompt = null;
     const installBanner = document.getElementById('installBanner');
     const installAppBtn = document.getElementById('installAppBtn');
@@ -470,7 +501,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker Registered:', reg.scope))
+          .then((reg) => console.log('Service Worker Registered successfully:', reg.scope))
           .catch((err) => console.warn('Service Worker Registration failed:', err));
       });
     }
@@ -478,34 +509,29 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      if (installBanner) installBanner.classList.remove('hidden');
+      installBanner.classList.remove('hidden');
     });
 
-    if (installAppBtn) {
-      installAppBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          if (outcome === 'accepted' && installBanner) {
-            installBanner.classList.add('hidden');
-          }
-          deferredPrompt = null;
+    installAppBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBanner.classList.add('hidden');
         }
-      });
-    }
+        deferredPrompt = null;
+      }
+    });
 
-    if (dismissInstallBtn) {
-      dismissInstallBtn.addEventListener('click', () => {
-        if (installBanner) installBanner.classList.add('hidden');
-      });
-    }
+    dismissInstallBtn.addEventListener('click', () => {
+      installBanner.classList.add('hidden');
+    });
 
     window.addEventListener('appinstalled', () => {
-      if (installBanner) installBanner.classList.add('hidden');
+      installBanner.classList.add('hidden');
       deferredPrompt = null;
     });
 
-    // Main Resizer & Converter Application
     document.addEventListener('DOMContentLoaded', () => {
       // DOM Elements
       const uploadSection = document.getElementById('uploadSection');
@@ -537,13 +563,15 @@
       const qualityDisplay = document.getElementById('qualityDisplay');
 
       // Format Controls
-      const formatRadios = document.querySelectorAll('input[name="formatOption"]');
+      const formatButtons = document.querySelectorAll('.format-btn');
+      const formatBadge = document.getElementById('formatBadge');
       const pdfOptions = document.getElementById('pdfOptions');
       const pdfPageSizeRadios = document.querySelectorAll('input[name="pdfPageSize"]');
 
       // Buttons
       const downloadBtn = document.getElementById('downloadBtn');
       const downloadBtnText = document.getElementById('downloadBtnText');
+      const downloadBtnSubtext = document.getElementById('downloadBtnSubtext');
       const copyClipboardBtn = document.getElementById('copyClipboardBtn');
       const reapplyBtn = document.getElementById('reapplyBtn');
 
@@ -588,15 +616,14 @@
       let originalSize = 0;
       let originalAspectRatio = 1;
       let isAspectRatioLocked = true;
-      let activeMode = 'target';
+      let activeMode = 'target'; // 'target' or 'manual'
+      let selectedFormat = 'image/jpeg'; // 'image/jpeg', 'image/png', 'application/pdf'
       let optimizedBlob = null;
       let optimizedUrl = null;
-      let previewRasterUrl = null;
       let debounceTimer = null;
       let isProcessing = false;
 
       function showToast(message, type = 'success') {
-        if (!toast) return;
         toastMessage.textContent = message;
         if (type === 'success') {
           toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
@@ -628,7 +655,7 @@
         }
       }
 
-      // Drag & Drop
+      // Drag and Drop
       ['dragenter', 'dragover'].forEach(eventName => {
         dropZone.addEventListener(eventName, (e) => {
           e.preventDefault();
@@ -659,7 +686,7 @@
         }
       });
 
-      // Sample Image Generator
+      // Sample Image Creator
       sampleImageBtn.addEventListener('click', () => {
         const sampleCanvas = document.createElement('canvas');
         sampleCanvas.width = 1920;
@@ -685,8 +712,8 @@
         sCtx.textAlign = 'center';
         sCtx.fillText('OptiPixel Sample Artwork', 1920 / 2, 520);
         sCtx.font = '32px Inter, sans-serif';
-        sCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        sCtx.fillText('1920 × 1080 • Ready for conversion', 1920 / 2, 590);
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        sCtx.fillText('1920 × 1080 • Ready for format conversion & compression', 1920 / 2, 590);
 
         sampleCanvas.toBlob((blob) => {
           const sampleFile = new File([blob], 'sample_artwork.png', { type: 'image/png' });
@@ -715,18 +742,18 @@
             heightInput.value = originalHeight;
 
             headerFileName.textContent = file.name;
-            headerFileInfo.textContent = `${originalWidth} × ${originalHeight} px • ${formatBytes(originalSize)}`;
+            headerFileInfo.textContent = originalWidth + ' × ' + originalHeight + ' px • ' + formatBytes(originalSize);
             origSizeDisplay.textContent = formatBytes(originalSize);
-            origDimDisplay.textContent = `${originalWidth} × ${originalHeight} px`;
-            origFormatDisplay.textContent = file.type.replace('image/', '').toUpperCase() || 'IMAGE';
+            origDimDisplay.textContent = originalWidth + ' × ' + originalHeight + ' px';
+            origFormatDisplay.textContent = (file.type.replace('image/', '') || 'IMAGE').toUpperCase();
 
             origImgPreview.src = e.target.result;
 
             uploadSection.classList.add('hidden');
             workspaceSection.classList.remove('hidden');
 
-            const sensibleTargetKb = Math.max(20, Math.min(300, Math.round(originalSize / 1024 * 0.5)));
-            targetSizeInput.value = sensibleTargetKb;
+            // Default target: 50 KB (standard portal requirement)
+            targetSizeInput.value = '50';
             targetSizeUnit.value = 'KB';
 
             triggerOptimization();
@@ -740,14 +767,15 @@
       resetBtn.addEventListener('click', () => {
         fileInput.value = '';
         currentFile = null;
-        if (optimizedUrl) URL.revokeObjectURL(optimizedUrl);
-        if (previewRasterUrl) URL.revokeObjectURL(previewRasterUrl);
-        optimizedUrl = null;
-        previewRasterUrl = null;
+        if (optimizedUrl) {
+          URL.revokeObjectURL(optimizedUrl);
+          optimizedUrl = null;
+        }
         workspaceSection.classList.add('hidden');
         uploadSection.classList.remove('hidden');
       });
 
+      // Aspect Ratio Lock
       aspectRatioLockBtn.addEventListener('click', () => {
         isAspectRatioLocked = !isAspectRatioLocked;
         if (isAspectRatioLocked) {
@@ -784,6 +812,7 @@
         scheduleOptimization();
       });
 
+      // Scale Presets
       document.querySelectorAll('.preset-scale-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const scale = parseFloat(btn.dataset.scale);
@@ -793,23 +822,50 @@
         });
       });
 
+      // Dimension Presets
       document.querySelectorAll('.preset-dim-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const preset = btn.dataset.preset;
-          if (preset === 'square') {
-            widthInput.value = 1080;
-            heightInput.value = 1080;
-          } else if (preset === 'fhd') {
-            widthInput.value = 1920;
-            heightInput.value = 1080;
-          } else if (preset === 'passport') {
-            widthInput.value = 413;
-            heightInput.value = 531;
+          const [w, h] = btn.dataset.dim.split(',').map(Number);
+          widthInput.value = w;
+          heightInput.value = h;
+          scheduleOptimization();
+        });
+      });
+
+      // Government Portal Presets
+      document.querySelectorAll('.portal-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const portal = btn.dataset.portal;
+          if (portal === 'passport') {
+            // Standard 3.5cm x 4.5cm photo (350x450 px), 50 KB JPG
+            widthInput.value = 350;
+            heightInput.value = 450;
+            targetSizeInput.value = 50;
+            targetSizeUnit.value = 'KB';
+            selectFormat('image/jpeg');
+            showToast('Passport Photo Preset Applied (350×450 px, ≤ 50 KB JPG)');
+          } else if (portal === 'signature') {
+            // Standard Signature (300x120 px), 20 KB JPG
+            widthInput.value = 300;
+            heightInput.value = 120;
+            targetSizeInput.value = 20;
+            targetSizeUnit.value = 'KB';
+            selectFormat('image/jpeg');
+            showToast('Signature Preset Applied (300×120 px, ≤ 20 KB JPG)');
+          } else if (portal === 'document') {
+            // Document A4 Sheet, 200 KB PDF
+            widthInput.value = originalWidth;
+            heightInput.value = originalHeight;
+            targetSizeInput.value = 200;
+            targetSizeUnit.value = 'KB';
+            selectFormat('application/pdf');
+            showToast('Document Preset Applied (A4, ≤ 200 KB PDF)');
           }
           scheduleOptimization();
         });
       });
 
+      // Mode Switch
       modeTargetBtn.addEventListener('click', () => {
         activeMode = 'target';
         modeTargetBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
@@ -828,6 +884,7 @@
         scheduleOptimization();
       });
 
+      // Target chips
       document.querySelectorAll('.target-chip-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.target-chip-btn').forEach(b => {
@@ -845,23 +902,43 @@
       autoScaleDownToggle.addEventListener('change', scheduleOptimization);
 
       qualitySlider.addEventListener('input', () => {
-        qualityDisplay.textContent = `${qualitySlider.value}%`;
+        qualityDisplay.textContent = qualitySlider.value + '%';
         scheduleOptimization();
       });
 
-      formatRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
-          if (radio.value === 'application/pdf') {
-            pdfOptions.classList.remove('hidden');
+      // Format Selection Handling
+      function selectFormat(format) {
+        selectedFormat = format;
+        formatButtons.forEach(btn => {
+          if (btn.dataset.format === format) {
+            btn.className = 'format-btn p-3 text-center rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold text-xs transition-all shadow-xs';
           } else {
-            pdfOptions.classList.add('hidden');
+            btn.className = 'format-btn p-3 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-xs hover:bg-slate-100 transition-all';
           }
+        });
+
+        if (format === 'application/pdf') {
+          pdfOptions.classList.remove('hidden');
+          formatBadge.textContent = 'Converting to PDF';
+        } else if (format === 'image/png') {
+          pdfOptions.classList.add('hidden');
+          formatBadge.textContent = 'Converting to PNG';
+        } else {
+          pdfOptions.classList.add('hidden');
+          formatBadge.textContent = 'Converting to JPG';
+        }
+      }
+
+      formatButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectFormat(btn.dataset.format);
           scheduleOptimization();
         });
       });
 
       pdfPageSizeRadios.forEach(r => r.addEventListener('change', scheduleOptimization));
 
+      // View Mode
       viewOptimizedBtn.addEventListener('click', () => {
         viewOptimizedBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
         viewSideBySideBtn.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all font-semibold';
@@ -893,24 +970,9 @@
         });
       }
 
-      // Universal Image Draw Helper (cleans transparency for JPG/PDF, preserves for PNG)
-      function renderCanvas(targetCanvas, width, height, mimeType) {
-        targetCanvas.width = width;
-        targetCanvas.height = height;
-        const renderCtx = targetCanvas.getContext('2d');
-
-        if (mimeType === 'image/jpeg') {
-          // Prevent black alpha artifacting when converting PNG to JPG
-          renderCtx.fillStyle = '#FFFFFF';
-          renderCtx.fillRect(0, 0, width, height);
-        } else {
-          // Preserve PNG transparency
-          renderCtx.clearRect(0, 0, width, height);
-        }
-        renderCtx.drawImage(originalImage, 0, 0, width, height);
-      }
-
-      // Universal Format Converter & Compressor Engine
+      /**
+       * Core Engine: Format Conversion, Iterative Quality Search, and Scale Down
+       */
       async function triggerOptimization() {
         if (!originalImage.src || isProcessing) return;
         isProcessing = true;
@@ -921,14 +983,11 @@
         try {
           const reqWidth = Math.max(16, parseInt(widthInput.value, 10) || originalWidth);
           const reqHeight = Math.max(16, parseInt(heightInput.value, 10) || originalHeight);
-          const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
           const isPdf = selectedFormat === 'application/pdf';
-          const isPng = selectedFormat === 'image/png';
 
-          // Target byte boundary
           let targetBytes = Infinity;
           if (activeMode === 'target') {
-            const rawVal = parseFloat(targetSizeInput.value) || 100;
+            const rawVal = parseFloat(targetSizeInput.value) || 50;
             const unit = targetSizeUnit.value;
             targetBytes = unit === 'MB' ? rawVal * 1024 * 1024 : rawVal * 1024;
           }
@@ -939,65 +998,69 @@
 
           let bestBlob = null;
           let bestQuality = 0.85;
+          let achievedDimensions = { width: curWidth, height: curHeight };
           let noticeMessage = '';
 
-          // Canvas MIME for raster generation
-          const canvasMime = isPng ? 'image/png' : 'image/jpeg';
+          // Format for canvas rendering
+          // When exporting to PDF or JPG, transparent pixels get a clean white fill
+          const canvasMime = (selectedFormat === 'image/png' && !isPdf) ? 'image/png' : 'image/jpeg';
 
           if (activeMode === 'manual') {
-            // Manual Quality Mode
             const qualityRatio = parseInt(qualitySlider.value, 10) / 100;
-            renderCanvas(offscreenCanvas, curWidth, curHeight, canvasMime);
+            offscreenCanvas.width = curWidth;
+            offscreenCanvas.height = curHeight;
+
+            if (canvasMime === 'image/jpeg') {
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(0, 0, curWidth, curHeight);
+            } else {
+              ctx.clearRect(0, 0, curWidth, curHeight);
+            }
+            ctx.drawImage(originalImage, 0, 0, curWidth, curHeight);
 
             bestBlob = await canvasToBlobPromise(offscreenCanvas, canvasMime, qualityRatio);
             bestQuality = qualityRatio;
-            noticeMessage = isPng
-              ? 'PNG lossless format generated. (Quality slider applies to JPG/PDF).'
-              : `Manual quality applied at ${Math.round(qualityRatio * 100)}%.`;
+            noticeMessage = 'Manual quality set to ' + Math.round(qualityRatio * 100) + '%.';
           } else {
-            // Target File Size Mode
-            const effectiveTargetBytes = isPdf ? Math.max(1024, targetBytes - 4096) : targetBytes;
+            // Reserve ~3.5 KB overhead for PDF headers if exporting as PDF
+            const effectiveTargetBytes = isPdf ? Math.max(1024, targetBytes - 3500) : targetBytes;
+            let scaleAttempt = 0;
+            const maxScaleAttempts = allowAutoDownscale ? 6 : 1;
+            let successUnderTarget = false;
 
-            if (isPng) {
-              // Canvas PNG is strictly lossless; file size is governed by pixel resolution
-              renderCanvas(offscreenCanvas, curWidth, curHeight, 'image/png');
-              bestBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
+            while (scaleAttempt < maxScaleAttempts && !successUnderTarget) {
+              offscreenCanvas.width = curWidth;
+              offscreenCanvas.height = curHeight;
 
-              if (bestBlob.size > effectiveTargetBytes && allowAutoDownscale) {
-                let attempts = 0;
-                while (bestBlob.size > effectiveTargetBytes && attempts < 5 && curWidth > 64 && curHeight > 64) {
-                  const ratio = Math.sqrt(effectiveTargetBytes / bestBlob.size) * 0.92;
+              if (canvasMime === 'image/jpeg') {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, curWidth, curHeight);
+              } else {
+                ctx.clearRect(0, 0, curWidth, curHeight);
+              }
+              ctx.drawImage(originalImage, 0, 0, curWidth, curHeight);
+
+              if (canvasMime === 'image/png') {
+                bestBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
+                if (bestBlob.size <= effectiveTargetBytes || !allowAutoDownscale) {
+                  successUnderTarget = bestBlob.size <= effectiveTargetBytes;
+                  break;
+                } else {
+                  // PNG is lossless in canvas; dimension reduction is required to hit strict KB targets
+                  const ratio = Math.sqrt(effectiveTargetBytes / bestBlob.size) * 0.94;
                   curWidth = Math.max(32, Math.round(curWidth * ratio));
                   curHeight = Math.max(32, Math.round(curHeight * ratio));
-                  renderCanvas(offscreenCanvas, curWidth, curHeight, 'image/png');
-                  bestBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
-                  attempts++;
+                  scaleAttempt++;
                 }
-              }
-
-              if (bestBlob.size <= effectiveTargetBytes) {
-                noticeMessage = curWidth !== reqWidth
-                  ? `PNG target reached by scaling resolution to ${curWidth}×${curHeight} px.`
-                  : 'PNG target reached at requested dimensions.';
               } else {
-                noticeMessage = `PNG closest size: ${formatBytes(bestBlob.size)}. Switch to JPG for lossy byte reduction.`;
-              }
-            } else {
-              // JPG / PDF Binary Search on Quality (0.02 - 1.0)
-              let scaleAttempts = 0;
-              const maxScaleAttempts = allowAutoDownscale ? 4 : 1;
-              let successUnderTarget = false;
-
-              while (scaleAttempts < maxScaleAttempts && !successUnderTarget) {
-                renderCanvas(offscreenCanvas, curWidth, curHeight, 'image/jpeg');
-
+                // JPEG Binary Search on quality (0.02 to 0.98)
                 let low = 0.02;
-                let high = 1.0;
+                let high = 0.98;
                 let iterations = 0;
                 let candidateBlob = null;
-                let candidateQuality = 0.8;
+                let candidateQuality = 0.75;
 
-                while (low <= high && iterations < 7) {
+                while (low <= high && iterations < 8) {
                   const mid = (low + high) / 2;
                   const b = await canvasToBlobPromise(offscreenCanvas, 'image/jpeg', mid);
                   iterations++;
@@ -1005,9 +1068,9 @@
                   if (b.size <= effectiveTargetBytes) {
                     candidateBlob = b;
                     candidateQuality = mid;
-                    low = mid + 0.05; // Try higher fidelity
+                    low = mid + 0.04;
                   } else {
-                    high = mid - 0.05; // Reduce quality
+                    high = mid - 0.04;
                   }
                 }
 
@@ -1016,59 +1079,61 @@
                   candidateQuality = 0.02;
                 }
 
-                bestBlob = candidateBlob;
-                bestQuality = candidateQuality;
-
-                if (bestBlob.size <= effectiveTargetBytes) {
+                if (candidateBlob.size <= effectiveTargetBytes) {
+                  bestBlob = candidateBlob;
+                  bestQuality = candidateQuality;
                   successUnderTarget = true;
                   break;
-                } else if (allowAutoDownscale && curWidth > 64 && curHeight > 64) {
-                  const ratio = Math.sqrt(effectiveTargetBytes / bestBlob.size) * 0.94;
-                  curWidth = Math.max(32, Math.round(curWidth * ratio));
-                  curHeight = Math.max(32, Math.round(curHeight * ratio));
-                  scaleAttempts++;
                 } else {
-                  break;
+                  bestBlob = candidateBlob;
+                  bestQuality = candidateQuality;
+                  if (allowAutoDownscale && curWidth > 48 && curHeight > 48) {
+                    const ratio = Math.sqrt(effectiveTargetBytes / candidateBlob.size) * 0.95;
+                    curWidth = Math.max(32, Math.round(curWidth * ratio));
+                    curHeight = Math.max(32, Math.round(curHeight * ratio));
+                    scaleAttempt++;
+                  } else {
+                    break;
+                  }
                 }
               }
+            }
 
-              if (bestBlob.size <= effectiveTargetBytes) {
-                noticeMessage = curWidth !== reqWidth
-                  ? `Target reached by adjusting quality and scaling to ${curWidth}×${curHeight} px.`
-                  : `Target reached at requested dimensions with ${Math.round(bestQuality * 100)}% quality.`;
+            achievedDimensions = { width: curWidth, height: curHeight };
+
+            if (bestBlob.size <= effectiveTargetBytes) {
+              if (curWidth !== reqWidth || curHeight !== reqHeight) {
+                noticeMessage = 'Target reached with smart scaling to ' + curWidth + ' × ' + curHeight + ' px.';
               } else {
-                noticeMessage = `Closest size reached: ${formatBytes(bestBlob.size)}. Enable Auto-Downscale to shrink further.`;
+                noticeMessage = 'Exact target reached at original dimensions with ' + Math.round(bestQuality * 100) + '% quality.';
               }
+            } else {
+              noticeMessage = 'Target achieved as closely as possible (' + formatBytes(bestBlob.size) + '). Enable Smart Downscale to shrink further.';
             }
           }
 
-          const achievedDimensions = { width: curWidth, height: curHeight };
-
-          // Handle PDF document generation
+          // Handle PDF Output
           if (isPdf) {
-            const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
-            if (!jsPDFClass) {
-              throw new Error('PDF library is loading or blocked by your browser network.');
-            }
-
+            const { jsPDF } = window.jspdf;
             const pdfPageMode = document.querySelector('input[name="pdfPageSize"]:checked').value;
-            const imgDataUrl = await new Promise((resolve) => {
+            
+            const imgDataUrl = await new Promise((res) => {
               const r = new FileReader();
-              r.onload = () => resolve(r.target.result);
+              r.onload = () => res(r.target.result);
               r.readAsDataURL(bestBlob);
             });
 
             let doc;
             if (pdfPageMode === 'fit') {
-              doc = new jsPDFClass({
+              doc = new jsPDF({
                 orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
                 unit: 'px',
                 format: [achievedDimensions.width, achievedDimensions.height]
               });
               doc.addImage(imgDataUrl, 'JPEG', 0, 0, achievedDimensions.width, achievedDimensions.height);
-              pdfPageInfo.textContent = `Fit Page: ${achievedDimensions.width} × ${achievedDimensions.height} px`;
+              pdfPageInfo.textContent = 'Fit to Image: ' + achievedDimensions.width + ' × ' + achievedDimensions.height + ' px';
             } else {
-              doc = new jsPDFClass({
+              doc = new jsPDF({
                 orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
                 unit: 'mm',
                 format: 'a4'
@@ -1092,7 +1157,7 @@
               const posY = margin + (usableH - renderH) / 2;
 
               doc.addImage(imgDataUrl, 'JPEG', posX, posY, renderW, renderH);
-              pdfPageInfo.textContent = `Standard A4 (${pageWidth} × ${pageHeight} mm)`;
+              pdfPageInfo.textContent = 'Standard A4 Sheet (210 × 297 mm)';
             }
 
             optimizedBlob = doc.output('blob');
@@ -1100,18 +1165,17 @@
             optimizedBlob = bestBlob;
           }
 
-          // Refresh object URLs
-          if (optimizedUrl) URL.revokeObjectURL(optimizedUrl);
-          if (previewRasterUrl) URL.revokeObjectURL(previewRasterUrl);
-
+          // Generate URL
+          if (optimizedUrl) {
+            URL.revokeObjectURL(optimizedUrl);
+          }
           optimizedUrl = URL.createObjectURL(optimizedBlob);
-          previewRasterUrl = URL.createObjectURL(bestBlob);
 
           // Update Previews
           if (isPdf) {
             pdfMockPreview.classList.remove('hidden');
             optimizedImgPreview.classList.add('hidden');
-            optimizedImgPreviewSplit.src = previewRasterUrl;
+            optimizedImgPreviewSplit.src = URL.createObjectURL(bestBlob);
           } else {
             pdfMockPreview.classList.add('hidden');
             optimizedImgPreview.classList.remove('hidden');
@@ -1119,55 +1183,52 @@
             optimizedImgPreviewSplit.src = optimizedUrl;
           }
 
-          // Update Stats Displays
+          // Update Displays
           const newSize = optimizedBlob.size;
           newSizeDisplay.textContent = formatBytes(newSize);
-          newDimDisplay.textContent = `${achievedDimensions.width} × ${achievedDimensions.height} px`;
-          canvasDimLabel.textContent = `${achievedDimensions.width} × ${achievedDimensions.height} px`;
+          newDimDisplay.textContent = achievedDimensions.width + ' × ' + achievedDimensions.height + ' px';
+          canvasDimLabel.textContent = achievedDimensions.width + ' × ' + achievedDimensions.height + ' px';
 
-          let formatLabel = 'JPG';
-          if (isPdf) {
-            formatLabel = 'PDF Document';
-          } else if (isPng) {
-            formatLabel = 'PNG (Lossless 24-bit)';
-          } else {
-            formatLabel = `JPG (Quality ${Math.round(bestQuality * 100)}%)`;
-          }
+          let formatLabel = isPdf ? 'PDF Document' : (selectedFormat === 'image/png' ? 'PNG (Lossless)' : 'JPG (Quality ' + Math.round(bestQuality * 100) + '%)');
           newFormatDisplay.textContent = formatLabel;
 
-          // Savings badge
+          // Savings Badge
           const savedBytes = originalSize - newSize;
           const savedPercent = ((savedBytes / originalSize) * 100).toFixed(1);
           if (savedBytes > 0) {
-            savingsPercentageBadge.textContent = `-${savedPercent}%`;
+            savingsPercentageBadge.textContent = '-' + savedPercent + '%';
             savingsPercentageBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white';
           } else {
             const addedPercent = (Math.abs(savedBytes) / originalSize * 100).toFixed(1);
-            savingsPercentageBadge.textContent = `+${addedPercent}%`;
+            savingsPercentageBadge.textContent = '+' + addedPercent + '%';
             savingsPercentageBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-amber-600 text-white';
           }
 
-          // Target reached badge
+          // Target Success Badge
           if (activeMode === 'target') {
-            targetSuccessBadge.classList.remove('hidden');
             if (newSize <= targetBytes) {
+              targetSuccessBadge.classList.remove('hidden');
               targetSuccessBadge.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800';
-              targetSuccessBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Target Reached';
+              targetSuccessBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Portal Validated (' + formatBytes(newSize) + ')';
             } else {
+              targetSuccessBadge.classList.remove('hidden');
               targetSuccessBadge.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800';
-              targetSuccessBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Near Target';
+              targetSuccessBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Close to Target';
             }
           } else {
             targetSuccessBadge.classList.add('hidden');
           }
 
           algorithmNoticeText.textContent = noticeMessage;
-          const downloadExt = isPdf ? 'PDF' : (isPng ? 'PNG' : 'JPG');
-          downloadBtnText.textContent = `Download ${formatBytes(newSize)} ${downloadExt}`;
+
+          // Update Download Button Label
+          let downloadExt = isPdf ? 'PDF' : (selectedFormat === 'image/png' ? 'PNG' : 'JPG');
+          downloadBtnText.textContent = 'Download ' + formatBytes(newSize) + ' ' + downloadExt;
+          downloadBtnSubtext.textContent = isPdf ? 'Compliant PDF Document Ready' : (selectedFormat === 'image/jpeg' ? 'Govt Portal & Exam Ready (White Background)' : 'High Quality Lossless PNG');
 
         } catch (error) {
           console.error('Optimization error:', error);
-          showToast('An error occurred during conversion/compression.', 'error');
+          showToast('An error occurred during compression.', 'error');
         } finally {
           isProcessing = false;
           processingOverlay.classList.remove('opacity-100');
@@ -1182,43 +1243,29 @@
           return;
         }
 
-        const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
         let ext = 'jpg';
-        let mimeType = 'image/jpeg';
-        if (selectedFormat === 'image/png') {
-          ext = 'png';
-          mimeType = 'image/png';
-        } else if (selectedFormat === 'application/pdf') {
-          ext = 'pdf';
-          mimeType = 'application/pdf';
-        }
+        if (selectedFormat === 'image/png') ext = 'png';
+        if (selectedFormat === 'application/pdf') ext = 'pdf';
 
         const originalBase = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : 'image';
-        const filename = `optimized_${originalBase}.${ext}`;
-
-        const finalBlob = (optimizedBlob.type === mimeType)
-          ? optimizedBlob
-          : new Blob([optimizedBlob], { type: mimeType });
-        const downloadUrl = URL.createObjectURL(finalBlob);
+        const filename = 'optimized_' + originalBase + '.' + ext;
 
         const a = document.createElement('a');
-        a.href = downloadUrl;
+        a.href = optimizedUrl;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
 
-        showToast(`Saved ${filename} to your device!`);
+        showToast('Saved ' + filename + ' to local device storage!');
       });
 
-      // Copy to Clipboard Action
+      // Copy to Clipboard
       copyClipboardBtn.addEventListener('click', async () => {
         if (!optimizedBlob) return;
-        const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
 
         if (selectedFormat === 'application/pdf') {
-          showToast('PDFs cannot be copied directly to clipboard. Use Download.', 'info');
+          showToast('PDF documents cannot be copied directly to clipboard. Use Download.', 'info');
           return;
         }
 
@@ -1231,13 +1278,13 @@
             await navigator.clipboard.write([
               new ClipboardItem({ 'image/png': copyBlob })
             ]);
-            showToast('Optimized image copied to clipboard!');
+            showToast('Image copied to clipboard!');
           } else {
-            showToast('Clipboard image copying is not supported on this browser.', 'error');
+            showToast('Clipboard copying is not supported in this browser.', 'error');
           }
         } catch (err) {
           console.error(err);
-          showToast('Unable to copy image. Use Download instead.', 'error');
+          showToast('Unable to copy image. Please use Download instead.', 'error');
         }
       });
 
