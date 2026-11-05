@@ -461,7 +461,7 @@
   <canvas id="offscreenCanvas" class="hidden"></canvas>
 
   <script>
-    // PWA Service Worker Registration & Installation Prompt Handling
+    // PWA Service Worker Registration & Installation Prompt
     let deferredPrompt = null;
     const installBanner = document.getElementById('installBanner');
     const installAppBtn = document.getElementById('installAppBtn');
@@ -470,37 +470,42 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker Registered successfully:', reg.scope))
-          .catch((err) => console.log('Service Worker Registration failed:', err));
+          .then((reg) => console.log('Service Worker Registered:', reg.scope))
+          .catch((err) => console.warn('Service Worker Registration failed:', err));
       });
     }
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBanner.classList.remove('hidden');
+      if (installBanner) installBanner.classList.remove('hidden');
     });
 
-    installAppBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          installBanner.classList.add('hidden');
+    if (installAppBtn) {
+      installAppBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted' && installBanner) {
+            installBanner.classList.add('hidden');
+          }
+          deferredPrompt = null;
         }
-        deferredPrompt = null;
-      }
-    });
+      });
+    }
 
-    dismissInstallBtn.addEventListener('click', () => {
-      installBanner.classList.add('hidden');
-    });
+    if (dismissInstallBtn) {
+      dismissInstallBtn.addEventListener('click', () => {
+        if (installBanner) installBanner.classList.add('hidden');
+      });
+    }
 
     window.addEventListener('appinstalled', () => {
-      installBanner.classList.add('hidden');
+      if (installBanner) installBanner.classList.add('hidden');
       deferredPrompt = null;
     });
 
+    // Main Resizer & Converter Application
     document.addEventListener('DOMContentLoaded', () => {
       // DOM Elements
       const uploadSection = document.getElementById('uploadSection');
@@ -586,10 +591,12 @@
       let activeMode = 'target';
       let optimizedBlob = null;
       let optimizedUrl = null;
+      let previewRasterUrl = null;
       let debounceTimer = null;
       let isProcessing = false;
 
       function showToast(message, type = 'success') {
+        if (!toast) return;
         toastMessage.textContent = message;
         if (type === 'success') {
           toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
@@ -613,14 +620,15 @@
         const k = 1024;
         const dm = decimals < 0 ? 0 : decimals;
         if (bytes < k) {
-          return `${bytes} B`;
+          return bytes + ' B';
         } else if (bytes < k * k) {
-          return `${(bytes / k).toFixed(dm)} KB`;
+          return (bytes / k).toFixed(dm) + ' KB';
         } else {
-          return `${(bytes / (k * k)).toFixed(dm)} MB`;
+          return (bytes / (k * k)).toFixed(dm) + ' MB';
         }
       }
 
+      // Drag & Drop
       ['dragenter', 'dragover'].forEach(eventName => {
         dropZone.addEventListener(eventName, (e) => {
           e.preventDefault();
@@ -651,6 +659,7 @@
         }
       });
 
+      // Sample Image Generator
       sampleImageBtn.addEventListener('click', () => {
         const sampleCanvas = document.createElement('canvas');
         sampleCanvas.width = 1920;
@@ -677,12 +686,12 @@
         sCtx.fillText('OptiPixel Sample Artwork', 1920 / 2, 520);
         sCtx.font = '32px Inter, sans-serif';
         sCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        sCtx.fillText('1920 × 1080 • Ready for compression', 1920 / 2, 590);
+        sCtx.fillText('1920 × 1080 • Ready for conversion', 1920 / 2, 590);
 
         sampleCanvas.toBlob((blob) => {
-          const sampleFile = new File([blob], 'sample_artwork.jpg', { type: 'image/jpeg' });
+          const sampleFile = new File([blob], 'sample_artwork.png', { type: 'image/png' });
           handleSelectedFile(sampleFile);
-        }, 'image/jpeg', 0.95);
+        }, 'image/png');
       });
 
       function handleSelectedFile(file) {
@@ -709,14 +718,14 @@
             headerFileInfo.textContent = `${originalWidth} × ${originalHeight} px • ${formatBytes(originalSize)}`;
             origSizeDisplay.textContent = formatBytes(originalSize);
             origDimDisplay.textContent = `${originalWidth} × ${originalHeight} px`;
-            origFormatDisplay.textContent = file.type.replace('image/', '').toUpperCase();
+            origFormatDisplay.textContent = file.type.replace('image/', '').toUpperCase() || 'IMAGE';
 
             origImgPreview.src = e.target.result;
 
             uploadSection.classList.add('hidden');
             workspaceSection.classList.remove('hidden');
 
-            const sensibleTargetKb = Math.max(20, Math.min(200, Math.round(originalSize / 1024 * 0.4)));
+            const sensibleTargetKb = Math.max(20, Math.min(300, Math.round(originalSize / 1024 * 0.5)));
             targetSizeInput.value = sensibleTargetKb;
             targetSizeUnit.value = 'KB';
 
@@ -731,10 +740,10 @@
       resetBtn.addEventListener('click', () => {
         fileInput.value = '';
         currentFile = null;
-        if (optimizedUrl) {
-          URL.revokeObjectURL(optimizedUrl);
-          optimizedUrl = null;
-        }
+        if (optimizedUrl) URL.revokeObjectURL(optimizedUrl);
+        if (previewRasterUrl) URL.revokeObjectURL(previewRasterUrl);
+        optimizedUrl = null;
+        previewRasterUrl = null;
         workspaceSection.classList.add('hidden');
         uploadSection.classList.remove('hidden');
       });
@@ -873,7 +882,7 @@
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           triggerOptimization();
-        }, 220);
+        }, 180);
       }
 
       function canvasToBlobPromise(canvas, mimeType, quality) {
@@ -884,6 +893,24 @@
         });
       }
 
+      // Universal Image Draw Helper (cleans transparency for JPG/PDF, preserves for PNG)
+      function renderCanvas(targetCanvas, width, height, mimeType) {
+        targetCanvas.width = width;
+        targetCanvas.height = height;
+        const renderCtx = targetCanvas.getContext('2d');
+
+        if (mimeType === 'image/jpeg') {
+          // Prevent black alpha artifacting when converting PNG to JPG
+          renderCtx.fillStyle = '#FFFFFF';
+          renderCtx.fillRect(0, 0, width, height);
+        } else {
+          // Preserve PNG transparency
+          renderCtx.clearRect(0, 0, width, height);
+        }
+        renderCtx.drawImage(originalImage, 0, 0, width, height);
+      }
+
+      // Universal Format Converter & Compressor Engine
       async function triggerOptimization() {
         if (!originalImage.src || isProcessing) return;
         isProcessing = true;
@@ -896,7 +923,9 @@
           const reqHeight = Math.max(16, parseInt(heightInput.value, 10) || originalHeight);
           const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
           const isPdf = selectedFormat === 'application/pdf';
+          const isPng = selectedFormat === 'image/png';
 
+          // Target byte boundary
           let targetBytes = Infinity;
           if (activeMode === 'target') {
             const rawVal = parseFloat(targetSizeInput.value) || 100;
@@ -910,62 +939,63 @@
 
           let bestBlob = null;
           let bestQuality = 0.85;
-          let achievedDimensions = { width: curWidth, height: curHeight };
           let noticeMessage = '';
 
-          const canvasMime = (selectedFormat === 'image/png' && !isPdf) ? 'image/png' : 'image/jpeg';
+          // Canvas MIME for raster generation
+          const canvasMime = isPng ? 'image/png' : 'image/jpeg';
 
           if (activeMode === 'manual') {
+            // Manual Quality Mode
             const qualityRatio = parseInt(qualitySlider.value, 10) / 100;
-            offscreenCanvas.width = curWidth;
-            offscreenCanvas.height = curHeight;
-
-            if (canvasMime === 'image/jpeg') {
-              ctx.fillStyle = '#FFFFFF';
-              ctx.fillRect(0, 0, curWidth, curHeight);
-            } else {
-              ctx.clearRect(0, 0, curWidth, curHeight);
-            }
-            ctx.drawImage(originalImage, 0, 0, curWidth, curHeight);
+            renderCanvas(offscreenCanvas, curWidth, curHeight, canvasMime);
 
             bestBlob = await canvasToBlobPromise(offscreenCanvas, canvasMime, qualityRatio);
             bestQuality = qualityRatio;
-            noticeMessage = `Manual quality set to ${(qualityRatio * 100).toFixed(0)}%.`;
+            noticeMessage = isPng
+              ? 'PNG lossless format generated. (Quality slider applies to JPG/PDF).'
+              : `Manual quality applied at ${Math.round(qualityRatio * 100)}%.`;
           } else {
+            // Target File Size Mode
             const effectiveTargetBytes = isPdf ? Math.max(1024, targetBytes - 4096) : targetBytes;
-            let scaleAttempt = 0;
-            const maxScaleAttempts = allowAutoDownscale ? 5 : 1;
-            let successUnderTarget = false;
 
-            while (scaleAttempt < maxScaleAttempts && !successUnderTarget) {
-              offscreenCanvas.width = curWidth;
-              offscreenCanvas.height = curHeight;
+            if (isPng) {
+              // Canvas PNG is strictly lossless; file size is governed by pixel resolution
+              renderCanvas(offscreenCanvas, curWidth, curHeight, 'image/png');
+              bestBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
 
-              if (canvasMime === 'image/jpeg') {
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, curWidth, curHeight);
-              } else {
-                ctx.clearRect(0, 0, curWidth, curHeight);
-              }
-              ctx.drawImage(originalImage, 0, 0, curWidth, curHeight);
-
-              if (canvasMime === 'image/png') {
-                bestBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
-                if (bestBlob.size <= effectiveTargetBytes || !allowAutoDownscale) {
-                  successUnderTarget = bestBlob.size <= effectiveTargetBytes;
-                  break;
-                } else {
-                  const ratio = Math.sqrt(effectiveTargetBytes / bestBlob.size) * 0.94;
+              if (bestBlob.size > effectiveTargetBytes && allowAutoDownscale) {
+                let attempts = 0;
+                while (bestBlob.size > effectiveTargetBytes && attempts < 5 && curWidth > 64 && curHeight > 64) {
+                  const ratio = Math.sqrt(effectiveTargetBytes / bestBlob.size) * 0.92;
                   curWidth = Math.max(32, Math.round(curWidth * ratio));
                   curHeight = Math.max(32, Math.round(curHeight * ratio));
-                  scaleAttempt++;
+                  renderCanvas(offscreenCanvas, curWidth, curHeight, 'image/png');
+                  bestBlob = await canvasToBlobPromise(offscreenCanvas, 'image/png');
+                  attempts++;
                 }
+              }
+
+              if (bestBlob.size <= effectiveTargetBytes) {
+                noticeMessage = curWidth !== reqWidth
+                  ? `PNG target reached by scaling resolution to ${curWidth}×${curHeight} px.`
+                  : 'PNG target reached at requested dimensions.';
               } else {
+                noticeMessage = `PNG closest size: ${formatBytes(bestBlob.size)}. Switch to JPG for lossy byte reduction.`;
+              }
+            } else {
+              // JPG / PDF Binary Search on Quality (0.02 - 1.0)
+              let scaleAttempts = 0;
+              const maxScaleAttempts = allowAutoDownscale ? 4 : 1;
+              let successUnderTarget = false;
+
+              while (scaleAttempts < maxScaleAttempts && !successUnderTarget) {
+                renderCanvas(offscreenCanvas, curWidth, curHeight, 'image/jpeg');
+
                 let low = 0.02;
                 let high = 1.0;
                 let iterations = 0;
                 let candidateBlob = null;
-                let candidateQuality = 0.75;
+                let candidateQuality = 0.8;
 
                 while (low <= high && iterations < 7) {
                   const mid = (low + high) / 2;
@@ -975,9 +1005,9 @@
                   if (b.size <= effectiveTargetBytes) {
                     candidateBlob = b;
                     candidateQuality = mid;
-                    low = mid + 0.05;
+                    low = mid + 0.05; // Try higher fidelity
                   } else {
-                    high = mid - 0.05;
+                    high = mid - 0.05; // Reduce quality
                   }
                 }
 
@@ -986,52 +1016,51 @@
                   candidateQuality = 0.02;
                 }
 
-                if (candidateBlob.size <= effectiveTargetBytes) {
-                  bestBlob = candidateBlob;
-                  bestQuality = candidateQuality;
+                bestBlob = candidateBlob;
+                bestQuality = candidateQuality;
+
+                if (bestBlob.size <= effectiveTargetBytes) {
                   successUnderTarget = true;
                   break;
+                } else if (allowAutoDownscale && curWidth > 64 && curHeight > 64) {
+                  const ratio = Math.sqrt(effectiveTargetBytes / bestBlob.size) * 0.94;
+                  curWidth = Math.max(32, Math.round(curWidth * ratio));
+                  curHeight = Math.max(32, Math.round(curHeight * ratio));
+                  scaleAttempts++;
                 } else {
-                  bestBlob = candidateBlob;
-                  bestQuality = candidateQuality;
-                  if (allowAutoDownscale && curWidth > 64 && curHeight > 64) {
-                    const ratio = Math.sqrt(effectiveTargetBytes / candidateBlob.size) * 0.95;
-                    curWidth = Math.max(32, Math.round(curWidth * ratio));
-                    curHeight = Math.max(32, Math.round(curHeight * ratio));
-                    scaleAttempt++;
-                  } else {
-                    break;
-                  }
+                  break;
                 }
               }
-            }
 
-            achievedDimensions = { width: curWidth, height: curHeight };
-
-            if (bestBlob.size <= effectiveTargetBytes) {
-              if (curWidth !== reqWidth || curHeight !== reqHeight) {
-                noticeMessage = `Target reached by adjusting quality and scaling to ${curWidth}×${curHeight} px.`;
+              if (bestBlob.size <= effectiveTargetBytes) {
+                noticeMessage = curWidth !== reqWidth
+                  ? `Target reached by adjusting quality and scaling to ${curWidth}×${curHeight} px.`
+                  : `Target reached at requested dimensions with ${Math.round(bestQuality * 100)}% quality.`;
               } else {
-                noticeMessage = `Exact target reached at original dimensions with ${(bestQuality * 100).toFixed(0)}% quality.`;
+                noticeMessage = `Closest size reached: ${formatBytes(bestBlob.size)}. Enable Auto-Downscale to shrink further.`;
               }
-            } else {
-              noticeMessage = `Target reached as closely as possible (${formatBytes(bestBlob.size)}). Enable Auto-Downscale to shrink further.`;
             }
           }
 
+          const achievedDimensions = { width: curWidth, height: curHeight };
+
+          // Handle PDF document generation
           if (isPdf) {
-            const { jsPDF } = window.jspdf;
+            const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+            if (!jsPDFClass) {
+              throw new Error('PDF library is loading or blocked by your browser network.');
+            }
+
             const pdfPageMode = document.querySelector('input[name="pdfPageSize"]:checked').value;
-            
-            const imgDataUrl = await new Promise((res) => {
+            const imgDataUrl = await new Promise((resolve) => {
               const r = new FileReader();
-              r.onload = () => res(r.target.result);
+              r.onload = () => resolve(r.target.result);
               r.readAsDataURL(bestBlob);
             });
 
             let doc;
             if (pdfPageMode === 'fit') {
-              doc = new jsPDF({
+              doc = new jsPDFClass({
                 orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
                 unit: 'px',
                 format: [achievedDimensions.width, achievedDimensions.height]
@@ -1039,7 +1068,7 @@
               doc.addImage(imgDataUrl, 'JPEG', 0, 0, achievedDimensions.width, achievedDimensions.height);
               pdfPageInfo.textContent = `Fit Page: ${achievedDimensions.width} × ${achievedDimensions.height} px`;
             } else {
-              doc = new jsPDF({
+              doc = new jsPDFClass({
                 orientation: achievedDimensions.width > achievedDimensions.height ? 'landscape' : 'portrait',
                 unit: 'mm',
                 format: 'a4'
@@ -1063,7 +1092,7 @@
               const posY = margin + (usableH - renderH) / 2;
 
               doc.addImage(imgDataUrl, 'JPEG', posX, posY, renderW, renderH);
-              pdfPageInfo.textContent = `Standard A4 (${doc.internal.pageSize.getWidth()} × ${doc.internal.pageSize.getHeight()} mm)`;
+              pdfPageInfo.textContent = `Standard A4 (${pageWidth} × ${pageHeight} mm)`;
             }
 
             optimizedBlob = doc.output('blob');
@@ -1071,15 +1100,18 @@
             optimizedBlob = bestBlob;
           }
 
-          if (optimizedUrl) {
-            URL.revokeObjectURL(optimizedUrl);
-          }
-          optimizedUrl = URL.createObjectURL(optimizedBlob);
+          // Refresh object URLs
+          if (optimizedUrl) URL.revokeObjectURL(optimizedUrl);
+          if (previewRasterUrl) URL.revokeObjectURL(previewRasterUrl);
 
+          optimizedUrl = URL.createObjectURL(optimizedBlob);
+          previewRasterUrl = URL.createObjectURL(bestBlob);
+
+          // Update Previews
           if (isPdf) {
             pdfMockPreview.classList.remove('hidden');
             optimizedImgPreview.classList.add('hidden');
-            optimizedImgPreviewSplit.src = URL.createObjectURL(bestBlob);
+            optimizedImgPreviewSplit.src = previewRasterUrl;
           } else {
             pdfMockPreview.classList.add('hidden');
             optimizedImgPreview.classList.remove('hidden');
@@ -1087,14 +1119,23 @@
             optimizedImgPreviewSplit.src = optimizedUrl;
           }
 
+          // Update Stats Displays
           const newSize = optimizedBlob.size;
           newSizeDisplay.textContent = formatBytes(newSize);
           newDimDisplay.textContent = `${achievedDimensions.width} × ${achievedDimensions.height} px`;
           canvasDimLabel.textContent = `${achievedDimensions.width} × ${achievedDimensions.height} px`;
 
-          let formatLabel = isPdf ? 'PDF Document' : (selectedFormat === 'image/png' ? 'PNG (Lossless)' : `JPG (Quality ${Math.round(bestQuality * 100)}%)`);
+          let formatLabel = 'JPG';
+          if (isPdf) {
+            formatLabel = 'PDF Document';
+          } else if (isPng) {
+            formatLabel = 'PNG (Lossless 24-bit)';
+          } else {
+            formatLabel = `JPG (Quality ${Math.round(bestQuality * 100)}%)`;
+          }
           newFormatDisplay.textContent = formatLabel;
 
+          // Savings badge
           const savedBytes = originalSize - newSize;
           const savedPercent = ((savedBytes / originalSize) * 100).toFixed(1);
           if (savedBytes > 0) {
@@ -1106,13 +1147,13 @@
             savingsPercentageBadge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-amber-600 text-white';
           }
 
+          // Target reached badge
           if (activeMode === 'target') {
+            targetSuccessBadge.classList.remove('hidden');
             if (newSize <= targetBytes) {
-              targetSuccessBadge.classList.remove('hidden');
               targetSuccessBadge.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800';
               targetSuccessBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Target Reached';
             } else {
-              targetSuccessBadge.classList.remove('hidden');
               targetSuccessBadge.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800';
               targetSuccessBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Near Target';
             }
@@ -1121,11 +1162,12 @@
           }
 
           algorithmNoticeText.textContent = noticeMessage;
-          downloadBtnText.textContent = `Download ${formatBytes(newSize)} ${isPdf ? 'PDF' : selectedFormat.replace('image/', '').toUpperCase()}`;
+          const downloadExt = isPdf ? 'PDF' : (isPng ? 'PNG' : 'JPG');
+          downloadBtnText.textContent = `Download ${formatBytes(newSize)} ${downloadExt}`;
 
         } catch (error) {
           console.error('Optimization error:', error);
-          showToast('An error occurred during compression.', 'error');
+          showToast('An error occurred during conversion/compression.', 'error');
         } finally {
           isProcessing = false;
           processingOverlay.classList.remove('opacity-100');
@@ -1133,6 +1175,7 @@
         }
       }
 
+      // Download Action
       downloadBtn.addEventListener('click', () => {
         if (!optimizedBlob) {
           showToast('No processed image to download.', 'error');
@@ -1141,28 +1184,41 @@
 
         const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
         let ext = 'jpg';
-        if (selectedFormat === 'image/png') ext = 'png';
-        if (selectedFormat === 'application/pdf') ext = 'pdf';
+        let mimeType = 'image/jpeg';
+        if (selectedFormat === 'image/png') {
+          ext = 'png';
+          mimeType = 'image/png';
+        } else if (selectedFormat === 'application/pdf') {
+          ext = 'pdf';
+          mimeType = 'application/pdf';
+        }
 
         const originalBase = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : 'image';
         const filename = `optimized_${originalBase}.${ext}`;
 
+        const finalBlob = (optimizedBlob.type === mimeType)
+          ? optimizedBlob
+          : new Blob([optimizedBlob], { type: mimeType });
+        const downloadUrl = URL.createObjectURL(finalBlob);
+
         const a = document.createElement('a');
-        a.href = optimizedUrl;
+        a.href = downloadUrl;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
 
-        showToast(`Saved ${filename} to local device!`);
+        showToast(`Saved ${filename} to your device!`);
       });
 
+      // Copy to Clipboard Action
       copyClipboardBtn.addEventListener('click', async () => {
         if (!optimizedBlob) return;
         const selectedFormat = document.querySelector('input[name="formatOption"]:checked').value;
 
         if (selectedFormat === 'application/pdf') {
-          showToast('PDFs cannot be directly copied to clipboard. Please use Download.', 'info');
+          showToast('PDFs cannot be copied directly to clipboard. Use Download.', 'info');
           return;
         }
 
@@ -1177,11 +1233,11 @@
             ]);
             showToast('Optimized image copied to clipboard!');
           } else {
-            showToast('Clipboard image copying is not supported in this browser.', 'error');
+            showToast('Clipboard image copying is not supported on this browser.', 'error');
           }
         } catch (err) {
           console.error(err);
-          showToast('Unable to copy image. Please use Download instead.', 'error');
+          showToast('Unable to copy image. Use Download instead.', 'error');
         }
       });
 
