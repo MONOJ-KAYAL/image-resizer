@@ -94,7 +94,7 @@
           </div>
           <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Image Resizer & Target Size Reducer</h1>
           <p class="text-slate-500 text-sm sm:text-base mt-2 max-w-xl mx-auto">
-            Reduce file size strictly under exact KB or MB limits (20 KB, 50 KB, 100 KB) and convert to JPG, PNG, or PDF for government and job portal submissions.
+            Reduce file size strictly under exact KB or MB limits (20 KB, 50 KB, 100 KB) and convert to JPG, PNG, or SVG for government forms, websites, and portal submissions.
           </p>
         </div>
 
@@ -110,7 +110,7 @@
               Drop your image here, or <span class="text-indigo-600 underline decoration-2 underline-offset-4">browse files</span>
             </h3>
             <p class="text-xs sm:text-sm text-slate-400 mt-1.5">
-              Supports any format (JPG, PNG, WEBP, GIF, BMP, TIFF)
+              Supports any format (JPG, PNG, WEBP, GIF, BMP, SVG, TIFF)
             </p>
 
             <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -180,7 +180,7 @@
               <button type="button" data-format="image/jpeg" class="format-btn p-3 text-center rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold text-xs transition-all shadow-xs">
                 <i class="fa-regular fa-file-image text-base mb-1 block"></i>
                 <span>JPG / JPEG</span>
-                <span class="block text-[10px] text-indigo-600/70 font-normal mt-0.5">Most Portals</span>
+                <span class="block text-[10px] text-indigo-600/70 font-normal mt-0.5">Govt Portals</span>
               </button>
 
               <!-- PNG Option -->
@@ -190,29 +190,12 @@
                 <span class="block text-[10px] text-slate-400 font-normal mt-0.5">Lossless</span>
               </button>
 
-              <!-- PDF Option -->
-              <button type="button" data-format="application/pdf" class="format-btn p-3 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-xs hover:bg-slate-100 transition-all">
-                <i class="fa-solid fa-file-pdf text-base mb-1 block"></i>
-                <span>PDF</span>
-                <span class="block text-[10px] text-slate-400 font-normal mt-0.5">Documents</span>
+              <!-- SVG Option -->
+              <button type="button" data-format="image/svg+xml" class="format-btn p-3 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-xs hover:bg-slate-100 transition-all">
+                <i class="fa-solid fa-bezier-curve text-base mb-1 block"></i>
+                <span>SVG</span>
+                <span class="block text-[10px] text-slate-400 font-normal mt-0.5">Vector XML</span>
               </button>
-            </div>
-
-            <!-- PDF Page Setup -->
-            <div id="pdfOptions" class="hidden p-3.5 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2.5 text-xs text-slate-700">
-              <div class="font-bold text-indigo-900 flex items-center gap-1.5">
-                <i class="fa-solid fa-sliders text-indigo-600"></i> PDF Document Page Layout
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer">
-                  <input type="radio" name="pdfPageSize" value="fit" checked class="text-indigo-600 focus:ring-indigo-500">
-                  <span class="font-medium text-slate-800">Fit to Image</span>
-                </label>
-                <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer">
-                  <input type="radio" name="pdfPageSize" value="a4" class="text-indigo-600 focus:ring-indigo-500">
-                  <span class="font-medium text-slate-800">Standard A4 Sheet</span>
-                </label>
-              </div>
             </div>
           </div>
           
@@ -322,13 +305,13 @@
               </div>
               <div class="flex flex-wrap gap-1.5">
                 <button data-portal="passport" class="portal-preset-btn text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 font-semibold text-slate-700 border border-amber-200 transition-all shadow-2xs">
-                  📸 Passport Photo (350×450 px • 20-50 KB JPG)
+                  📸 Passport Photo (350×450 px • 20-50 KB)
                 </button>
                 <button data-portal="signature" class="portal-preset-btn text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 font-semibold text-slate-700 border border-amber-200 transition-all shadow-2xs">
-                  ✍️ Signature (300×120 px • 10-20 KB JPG)
+                  ✍️ Signature (300×120 px • 10-20 KB)
                 </button>
-                <button data-portal="document" class="portal-preset-btn text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 font-semibold text-slate-700 border border-amber-200 transition-all shadow-2xs">
-                  📄 Doc/Cert (A4 • Max 200 KB PDF)
+                <button data-portal="idcard" class="portal-preset-btn text-xs px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 font-semibold text-slate-700 border border-amber-200 transition-all shadow-2xs">
+                  🪪 ID / Cert Scan (Max 200 KB JPG)
                 </button>
               </div>
             </div>
@@ -347,14 +330,14 @@
             </div>
           </div>
 
-          <!-- Box 4: Action & Download -->
+          <!-- Box 4: Action & Dynamic Download Button -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
             <button id="downloadBtn" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-sm shadow-md shadow-indigo-200 flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.99]">
               <div class="flex items-center gap-2 text-base">
-                <i class="fa-solid fa-download"></i>
-                <span id="downloadBtnText">Download JPG</span>
+                <i id="downloadIcon" class="fa-solid fa-download"></i>
+                <span id="downloadBtnText">Download 0 KB JPG</span>
               </div>
-              <span id="downloadBtnSubtext" class="text-[11px] font-normal text-indigo-100">Govt Portal & Exam Ready (White Background)</span>
+              <span id="downloadBtnSubtext" class="text-[11px] font-normal text-indigo-100">Govt Portal & Exam Ready (Solid White Background)</span>
             </button>
 
             <div class="grid grid-cols-2 gap-2">
@@ -379,7 +362,7 @@
                 <i class="fa-solid fa-chart-simple text-indigo-600"></i> Optimization Result
               </h3>
               <div id="targetSuccessBadge" class="hidden inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">
-                <i class="fa-solid fa-circle-check text-emerald-600"></i> Portal Validated
+                <i class="fa-solid fa-circle-check text-emerald-600"></i> Target Reached
               </div>
             </div>
 
@@ -439,20 +422,6 @@
               <!-- Single View -->
               <div id="singlePreviewContainer" class="w-full h-full flex items-center justify-center">
                 <img id="optimizedImgPreview" class="max-w-full max-h-[480px] object-contain rounded-lg shadow-sm" alt="Optimized Preview">
-                
-                <!-- PDF Mock View with Visual Thumbnail -->
-                <div id="pdfMockPreview" class="hidden flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-xl shadow-md text-center max-w-sm">
-                  <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl mb-2 shadow-inner">
-                    <i class="fa-solid fa-file-pdf"></i>
-                  </div>
-                  <h4 class="text-sm font-bold text-slate-800">PDF Document Ready</h4>
-                  <p class="text-xs text-slate-500 mt-0.5">Compliant standalone PDF with embedded image.</p>
-                  <span id="pdfPageInfo" class="mt-2 text-xs bg-slate-100 text-slate-700 font-mono px-2.5 py-1 rounded-lg">Fit to image</span>
-                  
-                  <div class="mt-3 border border-slate-200 rounded-lg overflow-hidden max-h-36 shadow-xs p-1 bg-slate-50">
-                    <img id="pdfThumbnailPreview" class="max-h-32 object-contain mx-auto rounded" alt="PDF content preview">
-                  </div>
-                </div>
               </div>
 
               <!-- Side-by-Side View -->
@@ -474,7 +443,7 @@
             </div>
 
             <div class="text-[11px] text-slate-400 flex items-center justify-between">
-              <span>Clean white canvas applied behind alpha when converting to JPG or PDF.</span>
+              <span>Solid white background applied automatically behind transparency for JPG.</span>
               <span id="canvasDimLabel" class="font-mono text-slate-500">0 × 0 px</span>
             </div>
           </div>
@@ -494,7 +463,7 @@
   <canvas id="offscreenCanvas" class="hidden"></canvas>
 
   <script>
-    // PWA Service Worker Registration & Installation Prompt Handling
+    // PWA Service Worker Registration & Installation Prompt
     let deferredPrompt = null;
     const installBanner = document.getElementById('installBanner');
     const installAppBtn = document.getElementById('installAppBtn');
@@ -503,7 +472,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker Registered successfully:', reg.scope))
+          .then((reg) => console.log('Service Worker Registered:', reg.scope))
           .catch((err) => console.warn('Service Worker Registration failed:', err));
       });
     }
@@ -533,102 +502,6 @@
       installBanner.classList.add('hidden');
       deferredPrompt = null;
     });
-
-    /**
-     * Pure JavaScript PDF Document Generator
-     * Complies with ISO 32000-1 (PDF 1.4).
-     * Embeds JPEG bytes directly with /DCTDecode.
-     * Works 100% offline with zero dependencies and no external CDN scripts.
-     */
-    async function generatePurePdfBlob(canvas, quality, isA4 = false) {
-      const jpegBlob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', quality));
-      const jpegBuffer = await jpegBlob.arrayBuffer();
-      const jpegBytes = new Uint8Array(jpegBuffer);
-
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-
-      let pageWidth, pageHeight, renderX, renderY, renderW, renderH;
-
-      if (isA4) {
-        // Standard A4: 595.28 x 841.89 points (210 x 297 mm)
-        pageWidth = 595.28;
-        pageHeight = 841.89;
-        const margin = 28.35; // 10mm
-        const availW = pageWidth - margin * 2;
-        const availH = pageHeight - margin * 2;
-        const aspect = imgWidth / imgHeight;
-
-        renderW = availW;
-        renderH = availW / aspect;
-        if (renderH > availH) {
-          renderH = availH;
-          renderW = availH * aspect;
-        }
-        renderX = margin + (availW - renderW) / 2;
-        renderY = margin + (availH - renderH) / 2;
-      } else {
-        // Match exact image pixel dimensions
-        pageWidth = imgWidth;
-        pageHeight = imgHeight;
-        renderX = 0;
-        renderY = 0;
-        renderW = imgWidth;
-        renderH = imgHeight;
-      }
-
-      // Content stream to place and scale the image in PDF coordinate space
-      const contentText = 'q\n' + renderW.toFixed(3) + ' 0 0 ' + renderH.toFixed(3) + ' ' + renderX.toFixed(3) + ' ' + renderY.toFixed(3) + ' cm\n/Im1 Do\nQ\n';
-      const contentBytes = new TextEncoder().encode(contentText);
-
-      const header = '%PDF-1.4\n%âãÏÓ\n';
-      const obj1 = '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n';
-      const obj2 = '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n';
-      const obj3 = '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pageWidth.toFixed(3) + ' ' + pageHeight.toFixed(3) + '] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>\nendobj\n';
-      const obj4Head = '4 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + imgWidth + ' /Height ' + imgHeight + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpegBytes.length + ' >>\nstream\n';
-      const obj4Tail = '\nendstream\nendobj\n';
-      const obj5 = '5 0 obj\n<< /Length ' + contentBytes.length + ' >>\nstream\n' + contentText + 'endstream\nendobj\n';
-
-      const enc = new TextEncoder();
-      const bHeader = enc.encode(header);
-      const bObj1 = enc.encode(obj1);
-      const bObj2 = enc.encode(obj2);
-      const bObj3 = enc.encode(obj3);
-      const bObj4Head = enc.encode(obj4Head);
-      const bObj4Tail = enc.encode(obj4Tail);
-      const bObj5 = enc.encode(obj5);
-
-      const offset1 = bHeader.length;
-      const offset2 = offset1 + bObj1.length;
-      const offset3 = offset2 + bObj2.length;
-      const offset4 = offset3 + bObj3.length;
-      const offset5 = offset4 + bObj4Head.length + jpegBytes.length + bObj4Tail.length;
-      const xrefOffset = offset5 + bObj5.length;
-
-      const pad10 = (n) => String(n).padStart(10, '0');
-      const xref = 'xref\n0 6\n0000000000 65535 f \r\n' +
-        pad10(offset1) + ' 00000 n \r\n' +
-        pad10(offset2) + ' 00000 n \r\n' +
-        pad10(offset3) + ' 00000 n \r\n' +
-        pad10(offset4) + ' 00000 n \r\n' +
-        pad10(offset5) + ' 00000 n \r\n';
-      const trailer = 'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF\n';
-      const bXref = enc.encode(xref);
-      const bTrailer = enc.encode(trailer);
-
-      return new Blob([
-        bHeader,
-        bObj1,
-        bObj2,
-        bObj3,
-        bObj4Head,
-        jpegBytes,
-        bObj4Tail,
-        bObj5,
-        bXref,
-        bTrailer
-      ], { type: 'application/pdf' });
-    }
 
     document.addEventListener('DOMContentLoaded', () => {
       // DOM Elements
@@ -663,8 +536,6 @@
       // Format Controls
       const formatButtons = document.querySelectorAll('.format-btn');
       const formatBadge = document.getElementById('formatBadge');
-      const pdfOptions = document.getElementById('pdfOptions');
-      const pdfPageSizeRadios = document.querySelectorAll('input[name="pdfPageSize"]');
 
       // Buttons
       const downloadBtn = document.getElementById('downloadBtn');
@@ -693,9 +564,6 @@
       const optimizedImgPreview = document.getElementById('optimizedImgPreview');
       const optimizedImgPreviewSplit = document.getElementById('optimizedImgPreviewSplit');
       const origImgPreview = document.getElementById('origImgPreview');
-      const pdfMockPreview = document.getElementById('pdfMockPreview');
-      const pdfPageInfo = document.getElementById('pdfPageInfo');
-      const pdfThumbnailPreview = document.getElementById('pdfThumbnailPreview');
       const processingOverlay = document.getElementById('processingOverlay');
 
       // Toast
@@ -716,7 +584,7 @@
       let originalAspectRatio = 1;
       let isAspectRatioLocked = true;
       let activeMode = 'target'; // 'target' or 'manual'
-      let selectedFormat = 'image/jpeg'; // 'image/jpeg', 'image/png', 'application/pdf'
+      let selectedFormat = 'image/jpeg'; // 'image/jpeg', 'image/png', 'image/svg+xml'
       let optimizedBlob = null;
       let optimizedUrl = null;
       let debounceTimer = null;
@@ -754,59 +622,7 @@
         }
       }
 
-      // Dynamic Download Button Updater
-      function updateDownloadButton(sizeBytes) {
-        let extLabel = 'JPG';
-        let subtext = 'Govt Portal & Exam Ready (White Background)';
-        if (selectedFormat === 'image/png') {
-          extLabel = 'PNG';
-          subtext = 'High Quality Lossless PNG';
-        } else if (selectedFormat === 'application/pdf') {
-          extLabel = 'PDF';
-          subtext = 'Compliant PDF Document Ready';
-        }
-
-        const sizeStr = sizeBytes ? formatBytes(sizeBytes) + ' ' : '';
-        downloadBtnText.textContent = 'Download ' + sizeStr + extLabel;
-        downloadBtnSubtext.textContent = subtext;
-      }
-
-      // Format Selection Handling
-      function selectFormat(format) {
-        selectedFormat = format;
-        formatButtons.forEach(btn => {
-          if (btn.dataset.format === format) {
-            btn.className = 'format-btn p-3 text-center rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold text-xs transition-all shadow-xs';
-          } else {
-            btn.className = 'format-btn p-3 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-xs hover:bg-slate-100 transition-all';
-          }
-        });
-
-        if (format === 'application/pdf') {
-          pdfOptions.classList.remove('hidden');
-          formatBadge.textContent = 'Converting to PDF';
-        } else if (format === 'image/png') {
-          pdfOptions.classList.add('hidden');
-          formatBadge.textContent = 'Converting to PNG';
-        } else {
-          pdfOptions.classList.add('hidden');
-          formatBadge.textContent = 'Converting to JPG';
-        }
-
-        // Immediately update button text
-        updateDownloadButton(optimizedBlob ? optimizedBlob.size : null);
-      }
-
-      formatButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          selectFormat(btn.dataset.format);
-          scheduleOptimization();
-        });
-      });
-
-      pdfPageSizeRadios.forEach(r => r.addEventListener('change', scheduleOptimization));
-
-      // Drag and Drop Listeners
+      // Drag and Drop
       ['dragenter', 'dragover'].forEach(eventName => {
         dropZone.addEventListener(eventName, (e) => {
           e.preventDefault();
@@ -874,7 +690,7 @@
 
       function handleSelectedFile(file) {
         if (!file.type.startsWith('image/')) {
-          showToast('Please select a valid image file (JPG, PNG, WEBP, etc.)', 'error');
+          showToast('Please select a valid image file (JPG, PNG, WEBP, SVG, etc.)', 'error');
           return;
         }
 
@@ -903,6 +719,7 @@
             uploadSection.classList.add('hidden');
             workspaceSection.classList.remove('hidden');
 
+            // Default target: 50 KB (standard portal requirement)
             targetSizeInput.value = '50';
             targetSizeUnit.value = 'KB';
 
@@ -1000,13 +817,13 @@
             targetSizeUnit.value = 'KB';
             selectFormat('image/jpeg');
             showToast('Signature Preset Applied (300×120 px, ≤ 20 KB JPG)');
-          } else if (portal === 'document') {
+          } else if (portal === 'idcard') {
             widthInput.value = originalWidth;
             heightInput.value = originalHeight;
             targetSizeInput.value = 200;
             targetSizeUnit.value = 'KB';
-            selectFormat('application/pdf');
-            showToast('Document Preset Applied (A4, ≤ 200 KB PDF)');
+            selectFormat('image/jpeg');
+            showToast('ID / Certificate Preset Applied (Original Dim, ≤ 200 KB JPG)');
           }
           scheduleOptimization();
         });
@@ -1053,7 +870,34 @@
         scheduleOptimization();
       });
 
-      // View Mode Toggle
+      // Format Selection Handling
+      function selectFormat(format) {
+        selectedFormat = format;
+        formatButtons.forEach(btn => {
+          if (btn.dataset.format === format) {
+            btn.className = 'format-btn p-3 text-center rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-700 font-bold text-xs transition-all shadow-xs';
+          } else {
+            btn.className = 'format-btn p-3 text-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-semibold text-xs hover:bg-slate-100 transition-all';
+          }
+        });
+
+        if (format === 'image/svg+xml') {
+          formatBadge.textContent = 'Converting to SVG';
+        } else if (format === 'image/png') {
+          formatBadge.textContent = 'Converting to PNG';
+        } else {
+          formatBadge.textContent = 'Converting to JPG';
+        }
+      }
+
+      formatButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectFormat(btn.dataset.format);
+          scheduleOptimization();
+        });
+      });
+
+      // View Mode
       viewOptimizedBtn.addEventListener('click', () => {
         viewOptimizedBtn.className = 'px-2.5 py-1 rounded-md bg-white text-indigo-600 shadow-sm transition-all font-semibold';
         viewSideBySideBtn.className = 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-all font-semibold';
@@ -1074,7 +918,7 @@
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           triggerOptimization();
-        }, 150);
+        }, 180);
       }
 
       function canvasToBlobPromise(canvas, mimeType, quality) {
@@ -1086,7 +930,7 @@
       }
 
       /**
-       * Core Optimization & Conversion Engine
+       * Core Optimization & Conversion Engine (JPG, PNG, SVG)
        */
       async function triggerOptimization() {
         if (!originalImage.src || isProcessing) return;
@@ -1098,7 +942,7 @@
         try {
           const reqWidth = Math.max(16, parseInt(widthInput.value, 10) || originalWidth);
           const reqHeight = Math.max(16, parseInt(heightInput.value, 10) || originalHeight);
-          const isPdf = selectedFormat === 'application/pdf';
+          const isSvg = selectedFormat === 'image/svg+xml';
 
           let targetBytes = Infinity;
           if (activeMode === 'target') {
@@ -1116,8 +960,8 @@
           let achievedDimensions = { width: curWidth, height: curHeight };
           let noticeMessage = '';
 
-          // Canvas MIME: Clean white background applied for JPG and PDF
-          const canvasMime = (selectedFormat === 'image/png' && !isPdf) ? 'image/png' : 'image/jpeg';
+          // When exporting to JPG, transparent alpha pixels receive a solid white background
+          const canvasMime = (selectedFormat === 'image/png') ? 'image/png' : 'image/jpeg';
 
           if (activeMode === 'manual') {
             const qualityRatio = parseInt(qualitySlider.value, 10) / 100;
@@ -1136,8 +980,8 @@
             bestQuality = qualityRatio;
             noticeMessage = 'Manual quality set to ' + Math.round(qualityRatio * 100) + '%.';
           } else {
-            // Target Size Mode: Reserve ~700 bytes for PDF wrapper if exporting as PDF
-            const effectiveTargetBytes = isPdf ? Math.max(1024, targetBytes - 700) : targetBytes;
+            // Reserve ~500 bytes overhead for SVG XML wrapping tags if SVG is selected
+            const effectiveTargetBytes = isSvg ? Math.max(512, targetBytes - 500) : targetBytes;
             let scaleAttempt = 0;
             const maxScaleAttempts = allowAutoDownscale ? 6 : 1;
             let successUnderTarget = false;
@@ -1225,22 +1069,13 @@
             }
           }
 
-          // Handle PDF Output using Pure JS Generator
-          if (isPdf) {
-            const pdfPageModeInput = document.querySelector('input[name="pdfPageSize"]:checked');
-            const isA4 = pdfPageModeInput && pdfPageModeInput.value === 'a4';
-
-            // Generate compliant PDF
-            optimizedBlob = await generatePurePdfBlob(offscreenCanvas, bestQuality, isA4);
-
-            if (isA4) {
-              pdfPageInfo.textContent = 'Standard A4 Sheet (210 × 297 mm)';
-            } else {
-              pdfPageInfo.textContent = 'Fit to Image: ' + achievedDimensions.width + ' × ' + achievedDimensions.height + ' px';
-            }
-
-            // Create thumbnail from canvas image
-            pdfThumbnailPreview.src = offscreenCanvas.toDataURL('image/jpeg', 0.8);
+          // Handle SVG Conversion
+          if (isSvg) {
+            const dataUrl = offscreenCanvas.toDataURL(canvasMime, bestQuality);
+            const svgString = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="' + achievedDimensions.width + '" height="' + achievedDimensions.height + '" viewBox="0 0 ' + achievedDimensions.width + ' ' + achievedDimensions.height + '">\n' +
+              '  <image width="' + achievedDimensions.width + '" height="' + achievedDimensions.height + '" href="' + dataUrl + '" />\n' +
+              '</svg>';
+            optimizedBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
           } else {
             optimizedBlob = bestBlob;
           }
@@ -1252,16 +1087,8 @@
           optimizedUrl = URL.createObjectURL(optimizedBlob);
 
           // Update Previews
-          if (isPdf) {
-            pdfMockPreview.classList.remove('hidden');
-            optimizedImgPreview.classList.add('hidden');
-            optimizedImgPreviewSplit.src = URL.createObjectURL(bestBlob);
-          } else {
-            pdfMockPreview.classList.add('hidden');
-            optimizedImgPreview.classList.remove('hidden');
-            optimizedImgPreview.src = optimizedUrl;
-            optimizedImgPreviewSplit.src = optimizedUrl;
-          }
+          optimizedImgPreview.src = optimizedUrl;
+          optimizedImgPreviewSplit.src = optimizedUrl;
 
           // Update Displays
           const newSize = optimizedBlob.size;
@@ -1269,7 +1096,7 @@
           newDimDisplay.textContent = achievedDimensions.width + ' × ' + achievedDimensions.height + ' px';
           canvasDimLabel.textContent = achievedDimensions.width + ' × ' + achievedDimensions.height + ' px';
 
-          let formatLabel = isPdf ? 'PDF Document' : (selectedFormat === 'image/png' ? 'PNG (Lossless)' : 'JPG (Quality ' + Math.round(bestQuality * 100) + '%)');
+          let formatLabel = isSvg ? 'SVG (Scalable Vector)' : (selectedFormat === 'image/png' ? 'PNG (Lossless)' : 'JPG (Quality ' + Math.round(bestQuality * 100) + '%)');
           newFormatDisplay.textContent = formatLabel;
 
           // Savings Badge
@@ -1289,7 +1116,7 @@
             if (newSize <= targetBytes) {
               targetSuccessBadge.classList.remove('hidden');
               targetSuccessBadge.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800';
-              targetSuccessBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Portal Validated (' + formatBytes(newSize) + ')';
+              targetSuccessBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Target Reached (' + formatBytes(newSize) + ')';
             } else {
               targetSuccessBadge.classList.remove('hidden');
               targetSuccessBadge.className = 'inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800';
@@ -1301,12 +1128,21 @@
 
           algorithmNoticeText.textContent = noticeMessage;
 
-          // Update Download Button with calculated size
-          updateDownloadButton(newSize);
+          // Update Download Button dynamically based on selected format
+          if (selectedFormat === 'image/svg+xml') {
+            downloadBtnText.textContent = 'Download ' + formatBytes(newSize) + ' SVG';
+            downloadBtnSubtext.textContent = 'Scalable Vector Graphic (SVG/XML)';
+          } else if (selectedFormat === 'image/png') {
+            downloadBtnText.textContent = 'Download ' + formatBytes(newSize) + ' PNG';
+            downloadBtnSubtext.textContent = 'Lossless Transparent PNG';
+          } else {
+            downloadBtnText.textContent = 'Download ' + formatBytes(newSize) + ' JPG';
+            downloadBtnSubtext.textContent = 'Govt Portal & Exam Ready (Solid White Background)';
+          }
 
         } catch (error) {
           console.error('Optimization error:', error);
-          showToast('An error occurred during compression.', 'error');
+          showToast('An error occurred during processing.', 'error');
         } finally {
           isProcessing = false;
           processingOverlay.classList.remove('opacity-100');
@@ -1323,12 +1159,16 @@
 
         let ext = 'jpg';
         if (selectedFormat === 'image/png') ext = 'png';
-        if (selectedFormat === 'application/pdf') ext = 'pdf';
+        if (selectedFormat === 'image/svg+xml') ext = 'svg';
 
-        const originalBase = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : 'document';
+        const originalBase = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : 'image';
         const filename = 'optimized_' + originalBase + '.' + ext;
 
-        const downloadUrl = URL.createObjectURL(optimizedBlob);
+        const downloadBlob = (ext === 'svg')
+          ? new Blob([optimizedBlob], { type: 'image/svg+xml;charset=utf-8' })
+          : optimizedBlob;
+
+        const downloadUrl = URL.createObjectURL(downloadBlob);
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = downloadUrl;
@@ -1340,7 +1180,7 @@
         setTimeout(() => {
           document.body.removeChild(a);
           URL.revokeObjectURL(downloadUrl);
-        }, 1500);
+        }, 1000);
 
         showToast('Saved ' + filename + ' to local device storage!');
       });
@@ -1349,12 +1189,15 @@
       copyClipboardBtn.addEventListener('click', async () => {
         if (!optimizedBlob) return;
 
-        if (selectedFormat === 'application/pdf') {
-          showToast('PDF documents cannot be copied directly to clipboard. Please use Download.', 'info');
-          return;
-        }
-
         try {
+          if (selectedFormat === 'image/svg+xml') {
+            // Read SVG text and copy to clipboard as text
+            const text = await optimizedBlob.text();
+            await navigator.clipboard.writeText(text);
+            showToast('SVG XML code copied to clipboard!');
+            return;
+          }
+
           if (navigator.clipboard && window.ClipboardItem) {
             let copyBlob = optimizedBlob;
             if (optimizedBlob.type !== 'image/png') {
@@ -1363,13 +1206,13 @@
             await navigator.clipboard.write([
               new ClipboardItem({ 'image/png': copyBlob })
             ]);
-            showToast('Image copied to clipboard!');
+            showToast('Optimized image copied to clipboard!');
           } else {
-            showToast('Clipboard copying is not supported in this browser.', 'error');
+            showToast('Clipboard image copying is not supported in this browser.', 'error');
           }
         } catch (err) {
           console.error(err);
-          showToast('Unable to copy image. Please use Download instead.', 'error');
+          showToast('Unable to copy to clipboard. Please use Download.', 'error');
         }
       });
 
